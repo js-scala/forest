@@ -1,0 +1,8 @@
+target/
+.DS_Store
+.cache
+.classpath
+.idea
+.idea_modules
+.project
+.target/
