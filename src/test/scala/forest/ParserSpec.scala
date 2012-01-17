@@ -9,17 +9,17 @@ class ParserSpec extends Specification {
   "a parser" should {
     "parse" >> {
       "a tag with just a name" >> {
-        parser.parse(parser.tree(0), "div").get must be_== (Tag("div"))
+        parser.parse(parser.tree(0), "div").get must equalTo (Tag("div"))
       }
       
       "tags with attributes" >> {
-        parser.parse(parser.tag, """span class="foo"""").get must be_== ("span", Map("class"->List(Literal("foo"))))
-        parser.parse(parser.tag, """span class="foo" id="bar"""").get must be_== ("span", Map("class"->List(Literal("foo")), "id"->List(Literal("bar"))))
+        parser.parse(parser.tagPrefix, """span class=foo""").get must equalTo ("span", Map("class"->List(RawText("foo"))))
+        parser.parse(parser.tagPrefix, """span class="foo" id="bar"""").get must equalTo ("span", Map("class"->List(RawText("foo")), "id"->List(RawText("bar"))))
       }
       
       "spaces" >> {
-        parser.parse(parser.indent(0), "  ").get must be_== (2)
-        parser.parse(parser.indent(2), "   ").get must be_== (3)
+        parser.parse(parser.indent(0), "  ").get must equalTo (2)
+        parser.parse(parser.indent(2), "   ").get must equalTo (3)
         parser.parse(parser.indent(2), " ").isEmpty must beTrue
       }
       
@@ -27,7 +27,7 @@ class ParserSpec extends Specification {
         parser.parse(parser.tree(0), """|div
                                         | span
                                         | a
-                                        |  img""".stripMargin).get must be_== (
+                                        |  img""".stripMargin).get must equalTo (
                                             Tag("div", List(
                                                 Tag("span"),
                                                 Tag("a", List(
@@ -40,7 +40,7 @@ class ParserSpec extends Specification {
         parser.parse(parser.tree(0), """|div
                                         |  span
                                         |       img
-                                        |  div""".stripMargin).get must be_== (
+                                        |  div""".stripMargin).get must equalTo (
                                               Tag("div", List(
                                                   Tag("span", List(
                                                       Tag("img")
@@ -50,23 +50,42 @@ class ParserSpec extends Specification {
       }
       
       "parameters" >> {
-        parser.parse(parser.parameters, "{article: Article}").get must be_== (Map("article"->"Article"))
+        parser.parse(parser.parameters, "{article: Article}").get must equalTo (Map("article"->Some("Article")))
       }
       
-      /*"a whole document" >> {
-        parser.parse(parser.document, """"|{article: Article}
-                                          |div class="foo"
-                                          |  span class="bar baz"
-                                          |  a href="/yop"""".stripMargin).get must be_== (
-                                                Document(
-                                                    Map("article"->"Article"),
-                                                    Node(Tag("div", Map("class"->"foo")), List(
-                                                          Node(Tag("span", Map("class"->"bar baz"))),
-                                                          Node(Tag("a", Map("href"->"/yop")))
-                                                        )
-                                                ))
-                                              )
-      }*/
+      "a whole document" >> {
+        parser.parse(parser.document, """|{article: Article}
+                                         |div class=foo
+                                         |  span class="bar baz"
+                                         |  a href="/yop"""".stripMargin).get must equalTo (
+                                               Document(
+                                                   Map("article"->Some("Article")),
+                                                   Tag("div", attrs=Map("class"->List(RawText("foo"))), children=List(
+                                                       Tag("span", attrs=Map("class"->List(RawText("bar baz")))),
+                                                       Tag("a", attrs=Map("href"->List(RawText("/yop"))))
+                                                   ))
+                                               )
+                                             )
+      }
+      
+      "a document using the forest expression language" >> {
+        parser.parse(parser.document, """|{article}
+                                         |div class={article.featured ? 'featured'}
+                                         |  {for color <- article.colors}
+                                         |    span
+                                         |      | Color: {color}""".stripMargin).get must equalTo (
+                                               Document(
+                                                 Map("article"->None),
+                                                 Tag("div", attrs=Map("class"->List(InlineIf(Data("article.featured"), Literal("featured"), None))), children=List(
+                                                   For("color", Data("article.colors"), List(
+                                                     Tag("span", children=List(
+                                                       Text(List(RawText("Color: "), Data("color")))
+                                                     ))
+                                                   ))
+                                                 ))
+                                               )
+                                             )
+      }
     }
   }
 }

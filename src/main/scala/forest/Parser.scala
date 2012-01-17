@@ -12,73 +12,94 @@ class Parser extends JavaTokenParsers {
   
   
   object Xml {
-    val tagName: Parser[String] = """[0-9a-zA-Z]+""".r // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
-    val attr: Parser[String] = """[^\s\u0000"'>/=]+""".r // http://www.w3.org/TR/html-markup/syntax.html#syntax-attributes
+    // Tag name http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
+    val tagName: Parser[String] = """[0-9a-zA-Z]+""".r
+    // Attribute name http://www.w3.org/TR/html-markup/syntax.html#syntax-attributes
+    val attr: Parser[String] = """[^\s\u0000"'>/=]+""".r 
   }
   
+  // Forest expression language parsers (everything that will be between “{” and “}”)
   object Forest {
     val data: Parser[Data] =
-      ident ^^ { Data(_) } // TODO handle paths
+      rep1sep(ident, ".") ^^ { idents => Data(idents.mkString(".")) } // TODO handle method calls
     val inlineIf: Parser[InlineIf] =
       (data ~ (" ? " ~> expr) ~ ((" : " ~> expr)?)) ^^ { case cond ~ thenPart ~ elsePart => InlineIf(cond, thenPart, elsePart) }
     val literal: Parser[Literal] =
-      ('"' ~> (not('"')+) <~ '"') ^^ { cs => Literal(cs.mkString) }
+      ('\'' ~> "[^']+".r <~ '\'') ^^ Literal // TODO handle quote escape, TODO double quote literals
   
     val expr: Parser[Expr] =
-      data | inlineIf | literal
+      literal | inlineIf | data
+    
+    val forGenerator: Parser[String~Data] =
+      ("for " ~> ident) ~ (" <- " ~> data)
+    
+    val `if`: Parser[Expr] =
+      "if " ~> expr
+    
+    val `else`: Parser[String] =
+      "else"
+    
+    val call: Parser[Data] =
+      ("call " ~> ident) ^^ Data
   }
+  
+  def wrapped[A](p: Parser[A]): Parser[A] =
+    "{" ~> p <~ "}"
   
   // Forest expression (enclosed in braces)
   val expr: Parser[Expr] =
-    "{" ~> Forest.expr <~ "}"
-  
-  // HTML text
-  // TODO handle `until` character escape
-  def rawText(until: Char): Parser[RawText] =
-    (not(until)+) ^^ { cs => RawText(cs.mkString) }
+    wrapped(Forest.expr)
   
   // Mix of raw text and forest expressions
   def textContent(until: Char): Parser[List[TextContent]] =
-    (rawText(until) | expr)+
+    (expr | (((not(elem(until) | "{" | nl) ~> ".".r)+) ^^ { cs => RawText(cs.mkString) }))+
   
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-attr-unquoted
-  // TODO handle character references
+  // TODO handle HTML character references
   val unquotedValue: Parser[List[TextContent]] =
-    (("""[^\s\u0000"'=<>`]+""".r ^^ { RawText(_) }) | expr) ^^ { List(_) }
+    (expr | ("""[^\s\u0000"'=<>`]+""".r ^^ RawText)) ^^ { List(_) }
   
   val quotedValue: Parser[List[TextContent]] =
     ('"' ~> textContent('"') <~ '"') | ("'" ~> textContent('\'') <~ "'")
   
-  val attrValue: Parser[List[TextContent]] =
-    unquotedValue | quotedValue | (success() ^^^ Nil)
+  val attr: Parser[(String, List[TextContent])] =
+    (Xml.attr ~ (('=' ~> (quotedValue | unquotedValue))?)) ^^ { case key ~ value => key -> value.getOrElse(Nil) }
   
   val attrs: Parser[Map[String, List[TextContent]]] =
-    repsep(
-        (Xml.attr ~ attrValue) ^^ { case key ~ value => (key -> value) },
-        space+
-    ) ^^ { as => as.toMap }
+    repsep(attr, space+) ^^ { as => as.toMap }
   
   // Beginning of a HTML tag: name and attributes
-  val tag: Parser[(String,Map[String, List[TextContent]])] =
+  val tagPrefix: Parser[(String,Map[String, List[TextContent]])] =
     (Xml.tagName ~ ((space ~> attrs)?)) ^^ { case name ~ attrs => (name, attrs.getOrElse(Map.empty)) }
+  
+  val text: Parser[Text] =
+    ("| " ~> textContent('\0')) ^^ Text
   
   // Expects at least `n` consecutive spaces. Returns the number of spaces.
   def indent(n: Int): Parser[Int] =
     (repN(n, space) ~> (space*)) ^^ { s => n + s.size }
   
   // From a given indentation value `n`, expects a tag, a blank line and children tags at a depth of `n + 1`
-  def tree(n: Int): Parser[Tag] = Parser { in =>
-    indent(n)(in) flatMapWithNext { depth =>
-      (tag ~ ((blankLines ~> tree(depth + 1))*)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) }
-    }
+  def tree(n: Int): Parser[Node] = Parser { in =>
+    
+    // Retrieve the children of a given depth d (i.e. all the subtrees at a depth of at least d + 1)
+    def children(d: Int): Parser[List[Node]] = ((blankLines ~> tree(d + 1))*)
+    
+    indent(n)(in) flatMapWithNext ( depth => // current node depth
+        ((tagPrefix ~ children(depth)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) })
+      | ((wrapped(Forest.forGenerator) ~ children(depth)) ^^ { case ident ~ data ~ children => For(ident, data, children) })
+      | ((wrapped(Forest.`if`) ~ children(depth)) ^^ { case expr ~ children => If(expr, children, None) })
+      | (wrapped(Forest.call) ^^ Call)
+      | text
+    )
   }
   
-  val parameter: Parser[(String, String)] =
-    (ident ~ (": " ~> ident)) ^^ { case name ~ kind => (name -> kind) }
+  val parameter: Parser[(String, Option[String])] =
+    (ident ~ ((": " ~> ident)?)) ^^ { case name ~ kind => (name -> kind) }
   
   // Template parameters
-  val parameters: Parser[Map[String, String]] =
-    ('{' ~> repsep(parameter, ", ") <~ '}') ^^ { _.toMap }
+  val parameters: Parser[Map[String, Option[String]]] =
+    wrapped(repsep(parameter, ", ")) ^^ { _.toMap }
   
   val document: Parser[Document] =
     (parameters ~ blankLines ~ tree(0)) ^^ { case p ~ _ ~ t => Document(p, t) }

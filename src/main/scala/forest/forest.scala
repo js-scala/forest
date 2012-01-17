@@ -3,9 +3,9 @@ package forest
 /**
  * Root object of the AST.
  */
-case class Document(parameters: Map[String, String], tree: Tag)
+case class Document(parameters: Map[String, Option[String]], tree: Node)
 
-sealed trait Node
+sealed abstract class Node
 
 /**
  * HTML tag optionally defining attributes whose values can be dynamic
@@ -32,7 +32,9 @@ case class Tag(
  */
 case class Text(content: List[TextContent]) extends Node // FIXME Since there is no end mark we can not attach a reference to a Text node
 
-sealed trait TextContent
+
+
+sealed abstract class TextContent
 
 /**
  * {{{
@@ -41,7 +43,16 @@ sealed trait TextContent
  */
 case class RawText(text: String) extends TextContent
 
-sealed trait Expr extends TextContent
+/**
+ * Base class for forest expressions.
+ * 
+ * {{{
+ *   {foo.bar}
+ *   {'foo'}
+ *   {foo.isBar ? foo.baz : 'bah'}
+ * }}}
+ */
+sealed abstract class Expr extends TextContent
 
 /**
  * {{{
@@ -88,7 +99,7 @@ case class For(it: String, seq: Data, body: List[Node]) extends Node
  *     div | Guest
  * }}}
  */
-case class If(cond: Expr, thenPart: Node, elsePart: Option[Node] = None) extends Node
+case class If(cond: Expr, thenPart: List[Node], elsePart: Option[List[Node]] = None) extends Node
 
 /**
  * Subtemplate call
@@ -99,4 +110,4 @@ case class If(cond: Expr, thenPart: Node, elsePart: Option[Node] = None) extends
  *       {call views.user(user)}
  * }}}
  */
-case class Call(name: String, args: List[Expr] = Nil) extends Node // FIXME quid template inheritance?
+case class Call(callee: Data) extends Node // FIXME quid template inheritance?
