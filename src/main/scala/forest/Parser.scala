@@ -21,11 +21,11 @@ class Parser extends JavaTokenParsers {
   // Forest expression language parsers (everything that will be between “{” and “}”)
   object Forest {
     val data: Parser[Data] =
-      rep1sep(ident, ".") ^^ { idents => Data(idents.mkString(".")) } // TODO handle method calls
+      positioned(rep1sep(ident, ".") ^^ { idents => Data(idents.mkString(".")) }) // TODO handle method calls
     val inlineIf: Parser[InlineIf] =
-      (data ~ (" ? " ~> expr) ~ ((" : " ~> expr)?)) ^^ { case cond ~ thenPart ~ elsePart => InlineIf(cond, thenPart, elsePart) }
+      positioned((data ~ (" ? " ~> expr) ~ ((" : " ~> expr)?)) ^^ { case cond ~ thenPart ~ elsePart => InlineIf(cond, thenPart, elsePart) })
     val literal: Parser[Literal] =
-      ('\'' ~> "[^']+".r <~ '\'') ^^ Literal // TODO handle quote escape, TODO double quote literals
+      positioned(('\'' ~> "[^']+".r <~ '\'') ^^ Literal) // TODO handle quote escape, TODO double quote literals
   
     val expr: Parser[Expr] =
       literal | inlineIf | data
@@ -73,7 +73,7 @@ class Parser extends JavaTokenParsers {
     (Xml.tagName ~ ((space ~> attrs)?)) ^^ { case name ~ attrs => (name, attrs.getOrElse(Map.empty)) }
   
   val text: Parser[Text] =
-    ("| " ~> textContent('\0')) ^^ Text
+    positioned(("| " ~> textContent('\0')) ^^ Text)
   
   // Expects at least `n` consecutive spaces. Returns the number of spaces.
   def indent(n: Int): Parser[Int] =
@@ -86,10 +86,10 @@ class Parser extends JavaTokenParsers {
     def children(d: Int): Parser[List[Node]] = ((blankLines ~> tree(d + 1))*)
     
     indent(n)(in) flatMapWithNext ( depth => // current node depth
-        ((tagPrefix ~ children(depth)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) })
-      | ((wrapped(Forest.forGenerator) ~ children(depth)) ^^ { case ident ~ data ~ children => For(ident, data, children) })
-      | ((wrapped(Forest.`if`) ~ children(depth)) ^^ { case expr ~ children => If(expr, children, None) })
-      | (wrapped(Forest.call) ^^ Call)
+        positioned((tagPrefix ~ children(depth)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) })
+      | positioned((wrapped(Forest.forGenerator) ~ children(depth)) ^^ { case ident ~ data ~ children => For(ident, data, children) })
+      | positioned((wrapped(Forest.`if`) ~ children(depth)) ^^ { case expr ~ children => If(expr, children, None) })
+      | positioned(wrapped(Forest.call) ^^ Call)
       | text
     )
   }
@@ -102,6 +102,6 @@ class Parser extends JavaTokenParsers {
     wrapped(repsep(parameter, ", ")) ^^ { _.toMap }
   
   val document: Parser[Document] =
-    (parameters ~ blankLines ~ tree(0)) ^^ { case p ~ _ ~ t => Document(p, t) }
+    positioned((parameters ~ blankLines ~ tree(0)) ^^ { case p ~ _ ~ t => Document(p, t) })
   
 }

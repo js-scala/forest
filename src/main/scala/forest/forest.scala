@@ -1,9 +1,11 @@
 package forest
 
+import scala.util.parsing.input.Positional
+
 /**
  * Root object of the AST.
  */
-case class Document(parameters: Map[String, Option[String]], tree: Node)
+case class Document(parameters: Map[String, Option[String]], tree: Node) extends Positional
 
 sealed abstract class Node
 
@@ -19,7 +21,7 @@ case class Tag(
     children: List[Node] = Nil,
     attrs: Map[String, List[TextContent]] = Map.empty,
     ref: Option[String] = None
-) extends Node
+) extends Node with Positional
 
 /**
  * A Node containing raw text or expressions mixed together
@@ -30,7 +32,7 @@ case class Tag(
  *   | Hello {user.name}
  * }}}
  */
-case class Text(content: List[TextContent]) extends Node // FIXME Since there is no end mark we can not attach a reference to a Text node
+case class Text(content: List[TextContent]) extends Node with Positional // FIXME Add a node ref?
 
 
 
@@ -41,7 +43,7 @@ sealed abstract class TextContent
  *   | This is a raw text content
  * }}}
  */
-case class RawText(text: String) extends TextContent
+case class RawText(text: String) extends TextContent with Positional
 
 /**
  * Base class for forest expressions.
@@ -59,14 +61,14 @@ sealed abstract class Expr extends TextContent
  *   {foo.bar.baz}
  * }}}
  */
-case class Data(path: String) extends Expr
+case class Data(path: String) extends Expr with Positional
 
 /**
  * {{{
  *   {foo.isBar ? foo.baz : 'bah'}
  * }}}
  */
-case class InlineIf(cond: Data, thenPart: Expr, elsePart: Option[Expr]) extends Expr
+case class InlineIf(cond: Data, thenPart: Expr, elsePart: Option[Expr]) extends Expr with Positional
 
 /**
  * {{{
@@ -74,7 +76,7 @@ case class InlineIf(cond: Data, thenPart: Expr, elsePart: Option[Expr]) extends 
  *   {"bar"}
  * }}}
  */
-case class Literal(value: String) extends Expr
+case class Literal(value: String) extends Expr with Positional
 
 /**
  * Loop
@@ -86,7 +88,7 @@ case class Literal(value: String) extends Expr
  *     li | {user.name}
  * }}}
  */
-case class For(it: String, seq: Data, body: List[Node]) extends Node
+case class For(it: String, seq: Data, body: List[Node]) extends Node with Positional
 
 /**
  * Condition (may have a else part)
@@ -99,7 +101,7 @@ case class For(it: String, seq: Data, body: List[Node]) extends Node
  *     div | Guest
  * }}}
  */
-case class If(cond: Expr, thenPart: List[Node], elsePart: Option[List[Node]] = None) extends Node
+case class If(cond: Expr, thenPart: List[Node], elsePart: Option[List[Node]] = None) extends Node with Positional
 
 /**
  * Subtemplate call
@@ -110,4 +112,4 @@ case class If(cond: Expr, thenPart: List[Node], elsePart: Option[List[Node]] = N
  *       {call views.user(user)}
  * }}}
  */
-case class Call(callee: Data) extends Node // FIXME quid template inheritance?
+case class Call(callee: Data) extends Node with Positional // FIXME quid template inheritance?
