@@ -1,6 +1,7 @@
 package forest
 
 import org.specs2.mutable.Specification
+import ast._
 
 class ParserSpec extends Specification {
 
@@ -50,7 +51,7 @@ class ParserSpec extends Specification {
       }
       
       "parameters" >> {
-        parser.parse(parser.parameters, "{article: Article}").get must equalTo (Map("article"->Some("Article")))
+        parser.parse(parser.parameters, "{article: Article}").get must equalTo (List("article"->Some("Article")))
       }
       
       "a whole document" >> {
@@ -59,7 +60,7 @@ class ParserSpec extends Specification {
                                          |  span class="bar baz"
                                          |  a href="/yop"""".stripMargin).get must equalTo (
                                                Document(
-                                                   Map("article"->Some("Article")),
+                                                   List("article"->Some("Article")),
                                                    Tag("div", attrs=Map("class"->List(RawText("foo"))), children=List(
                                                        Tag("span", attrs=Map("class"->List(RawText("bar baz")))),
                                                        Tag("a", attrs=Map("href"->List(RawText("/yop"))))
@@ -75,7 +76,7 @@ class ParserSpec extends Specification {
                                          |    span
                                          |      | Color: {color}""".stripMargin).get must equalTo (
                                                Document(
-                                                 Map("article"->None),
+                                                 List("article"->None),
                                                  Tag("div", attrs=Map("class"->List(InlineIf(Data("article.featured"), Literal("featured"), None))), children=List(
                                                    For("color", Data("article.colors"), List(
                                                      Tag("span", children=List(

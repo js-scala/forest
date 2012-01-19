@@ -1,6 +1,7 @@
 package forest
 
 import util.parsing.combinator.JavaTokenParsers
+import ast._
 
 class Parser extends JavaTokenParsers {
   
@@ -98,8 +99,8 @@ class Parser extends JavaTokenParsers {
     (ident ~ ((": " ~> ident)?)) ^^ { case name ~ kind => (name -> kind) }
   
   // Template parameters
-  val parameters: Parser[Map[String, Option[String]]] =
-    wrapped(repsep(parameter, ", ")) ^^ { _.toMap }
+  val parameters: Parser[List[(String, Option[String])]] =
+    wrapped(repsep(parameter, ", "))
   
   val document: Parser[Document] =
     positioned((parameters ~ blankLines ~ tree(0)) ^^ { case p ~ _ ~ t => Document(p, t) })
