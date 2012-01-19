@@ -59,7 +59,7 @@ class ScalaText extends Backend {
     }
     case If(c, t, e) => {
       val out = new collection.mutable.StringBuilder
-      out.append("if (%s) {\n".format(c))
+      out.append("if (%s) {\n".format(expr(c)))
       for (n <- t) {
         out.append(node(n))
       }
@@ -77,7 +77,7 @@ class ScalaText extends Backend {
   def textContent(content: List[TextContent]): String = content.map {
       case RawText(t) => "\"\"\"%s\"\"\"".format(t)
       case e: Expr => expr(e)
-    }.mkString("\n")
+    }.mkString(" + ")
   
   def expr(e: Expr): String = e match {
     case Data(p) => p

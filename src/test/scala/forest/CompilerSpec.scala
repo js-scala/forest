@@ -26,5 +26,15 @@ class CompilerSpec extends Specification {
       (targetDir / "article.js").exists must beTrue
     }
 
+    "compile a forest file to a Scala function" >> {
+      compiler.compile(resourcesDir / "variables.forest", new ScalaText, targetDir)
+      (targetDir / "variables.scala").exists must beTrue
+    }
+
+    "compile a forest file to a JavaScript function" >> {
+      compiler.compile(resourcesDir / "variables.forest", new JsDom, targetDir)
+      (targetDir / "variables.js").exists must beTrue
+    }
+
   }
 }

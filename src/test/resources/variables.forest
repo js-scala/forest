@@ -1,0 +1,5 @@
+{foo: Int, bar: String, cond: Boolean}
+span class={bar}
+  | {foo} times.
+  {if cond}
+    img src="/true.png"
