@@ -8,8 +8,8 @@ import forest.ast._
  */
 class ScalaText extends Backend {
   
-  override def generate(source: Path, document: Document, targetDir: Path) {
-    (targetDir / (source.simpleName + ".scala")).write(
+  override def generate(document: Document, namespace: List[String], targetDir: Path) {
+    (targetDir / (namespace.last + ".scala")).write(
         """|
            |object %s {
            |  def apply(%s): String = {
@@ -18,7 +18,7 @@ class ScalaText extends Backend {
            |    out.toString
            |  }
            |}""".stripMargin.format(
-                 source.simpleName,
+                 namespace.last,
                  (for ((name, kind) <- document.parameters) yield name + ": " + kind.getOrElse("Any")).mkString(", "),
                  node(document.tree)
                )
@@ -66,12 +66,13 @@ class ScalaText extends Backend {
       out.append((for (`else` <- e) yield (
             "} else {\n"
           + (`else`.map(node)).mkString
+          + "}\n"
        )) getOrElse (
            "}\n"
        ))
        out.toString
     }
-    case Call(c) => "out.append(%s)\n".format(c)
+    case Call(tmpl, args) => "out.append(%s(%s))\n".format(tmpl, args.map(expr).mkString(", "))
   }
   
   def textContent(content: List[TextContent]): String = content.map {

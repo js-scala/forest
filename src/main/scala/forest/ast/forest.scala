@@ -113,4 +113,4 @@ case class If(cond: Expr, thenPart: List[Node], elsePart: Option[List[Node]] = N
  *       {call views.user(user)}
  * }}}
  */
-case class Call(callee: Data) extends Node with Positional // FIXME quid template inheritance?
+case class Call(callee: String, args: List[Expr]) extends Node with Positional // FIXME quid template inheritance?

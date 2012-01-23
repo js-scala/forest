@@ -10,14 +10,33 @@ class JsDom extends Backend {
   
   private val symbols = new SymbolGenerator
   
-  override def generate(source: Path, document: Document, targetDir: Path) {
-    (targetDir / (source.simpleName + ".js")).write(
-        """|var %s = function (%s) {
+  override def generate(document: Document, names: List[String], targetDir: Path) {
+    (targetDir / (names.mkString(".") + ".js")).write(
+        """|%s
+           |%s = function (%s) {
            |  %s
            |}""".stripMargin.format(
-               source.simpleName,
+               namespace(names),
+               names.mkString("."),
                (for ((name, _) <- document.parameters) yield name).mkString(", "),
                node(document.tree, None)))
+  }
+  
+  /**
+   * Generate the namespace of the target
+   * @param names Parts of the namespace. *At least one element*.
+   */
+  def namespace(names: List[String]): String = {
+    val (root :: ns) = names
+    def sub(names: List[String], processed: List[String]): String = names match {
+      case n :: ns => {
+        val p = n :: processed
+        val current = p.mkString(".")
+        "if (typeof %s == 'undefined') { %s = {}; }\n".format(current, current) + sub(ns, p)
+      }
+      case Nil => ""
+    }
+    "if (typeof %s == 'undefined') { var %s = {}; }\n".format(names.head, names.head) + sub(names.tail, List(root))
   }
   
   def node(n: Node, parentName: Option[String]): String = n match {
@@ -60,13 +79,14 @@ class JsDom extends Backend {
       out.append((for (`else` <- maybeElse) yield (
           "} else {\n"
         + (`else`.map { node(_, parentName) }).mkString
+        + "}\n"
       )) getOrElse (
         "}\n"
       ))
       out.toString
     }
-    case Call(c) => appendOrReturn(parentName, symbols.fresh()) { varName =>
-      "var %s = %s;\n".format(varName, c)
+    case Call(tmpl, args) => appendOrReturn(parentName, symbols.fresh()) { varName =>
+      "var %s = %s(%s);\n".format(varName, tmpl, args.map(expr).mkString(", "))
     }
   }
   

@@ -21,8 +21,12 @@ class Parser extends JavaTokenParsers {
   
   // Forest expression language parsers (everything that will be between “{” and “}”)
   object Forest {
+    // A path through an object (e.g. “foo.bar.baz”)
+    val path: Parser[String] =
+      rep1sep(ident, ".") ^^ { idents => idents.mkString(".") }
+    
     val data: Parser[Data] =
-      positioned(rep1sep(ident, ".") ^^ { idents => Data(idents.mkString(".")) }) // TODO handle method calls
+      positioned(path ^^ Data)
     val inlineIf: Parser[InlineIf] =
       positioned((data ~ (" ? " ~> expr) ~ ((" : " ~> expr)?)) ^^ { case cond ~ thenPart ~ elsePart => InlineIf(cond, thenPart, elsePart) })
     val literal: Parser[Literal] =
@@ -40,8 +44,12 @@ class Parser extends JavaTokenParsers {
     val `else`: Parser[String] =
       "else"
     
-    val call: Parser[Data] =
-      ("call " ~> ident) ^^ Data
+    // Something wrapped in parenthesis
+    val bracketsContent: Parser[String] =
+      ""
+    
+    val call: Parser[Call] =
+      positioned(("call " ~> path ~ ("(" ~> repsep(expr, ", ") <~ ")")) ^^ { case tmpl ~ params => Call(tmpl, params) })
   }
   
   def wrapped[A](p: Parser[A]): Parser[A] =
@@ -85,12 +93,14 @@ class Parser extends JavaTokenParsers {
     
     // Retrieve the children of a given depth d (i.e. all the subtrees at a depth of at least d + 1)
     def children(d: Int): Parser[List[Node]] = ((blankLines ~> tree(d + 1))*)
+    // Get the sibling of a node, at a given depth
+    def sibling(d: Int): Parser[Node] = blankLines ~> tree(d)
     
     indent(n)(in) flatMapWithNext ( depth => // current node depth
         positioned((tagPrefix ~ children(depth)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) })
       | positioned((wrapped(Forest.forGenerator) ~ children(depth)) ^^ { case ident ~ data ~ children => For(ident, data, children) })
-      | positioned((wrapped(Forest.`if`) ~ children(depth)) ^^ { case expr ~ children => If(expr, children, None) })
-      | positioned(wrapped(Forest.call) ^^ Call)
+      | positioned((wrapped(Forest.`if`) ~ children(depth) ~ ((blankLines ~> repN(depth, space) ~> wrapped(Forest.`else`) ~> children(depth))?)) ^^ { case expr ~ thenChildren ~ elseChildren => If(expr, thenChildren, elseChildren) })
+      | positioned(wrapped(Forest.call))
       | text
     )
   }

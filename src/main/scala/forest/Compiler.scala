@@ -10,7 +10,7 @@ class Compiler {
   def compile(source: Path, backend: Backend, outputDir: Path) {
     val result = parser.parseAll(parser.document, source.slurpString)
     if (result.successful) {
-      backend.generate(source, result.get, outputDir)
+      backend.generate(result.get, List(source.simpleName), outputDir)
     } else {
       println("Huston, we have a problem: " + result)
     }
