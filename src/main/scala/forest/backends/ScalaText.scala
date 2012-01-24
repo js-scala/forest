@@ -9,8 +9,9 @@ import forest.ast._
 class ScalaText extends Backend {
   
   override def generate(document: Document, namespace: List[String], targetDir: Path) {
-    (targetDir / (namespace.last + ".scala")).write(
-        """|
+    val pkgName = if (namespace.size > 1) namespace.take(namespace.size - 1).mkString(".") else "__root__"
+    (targetDir / (namespace.mkString(".") + ".scala")).write(
+        """|package %s
            |object %s {
            |  def apply(%s): String = {
            |    val out  = new collection.mutable.StringBuilder
@@ -18,6 +19,7 @@ class ScalaText extends Backend {
            |    out.toString
            |  }
            |}""".stripMargin.format(
+                 pkgName,
                  namespace.last,
                  (for ((name, kind) <- document.parameters) yield name + ": " + kind.getOrElse("Any")).mkString(", "),
                  node(document.tree)

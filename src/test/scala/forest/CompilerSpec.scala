@@ -17,22 +17,22 @@ class CompilerSpec extends Specification {
   "a compiler" should {
     
     "compile a forest file to a Scala function" >> {
-      compiler.compile(resourcesDir / "article.forest", new ScalaText, targetDir)
+      compiler.compile(resourcesDir / "article.forest", Nil, new ScalaText, targetDir)
       (targetDir / "article.scala").exists must beTrue
     }
 
     "compile a forest file to a JavaScript function" >> {
-      compiler.compile(resourcesDir / "article.forest", new JsDom, targetDir)
+      compiler.compile(resourcesDir / "article.forest", Nil, new JsDom, targetDir)
       (targetDir / "article.js").exists must beTrue
     }
 
     "compile a forest file to a Scala function" >> {
-      compiler.compile(resourcesDir / "variables.forest", new ScalaText, targetDir)
+      compiler.compile(resourcesDir / "variables.forest", Nil, new ScalaText, targetDir)
       (targetDir / "variables.scala").exists must beTrue
     }
 
     "compile a forest file to a JavaScript function" >> {
-      compiler.compile(resourcesDir / "variables.forest", new JsDom, targetDir)
+      compiler.compile(resourcesDir / "variables.forest", Nil, new JsDom, targetDir)
       (targetDir / "variables.js").exists must beTrue
     }
 

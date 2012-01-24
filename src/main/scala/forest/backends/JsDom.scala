@@ -27,7 +27,7 @@ class JsDom extends Backend {
    * @param names Parts of the namespace. *At least one element*.
    */
   def namespace(names: List[String]): String = {
-    val (root :: ns) = names
+    val root :: ns = names
     def sub(names: List[String], processed: List[String]): String = names match {
       case n :: ns => {
         val p = n :: processed

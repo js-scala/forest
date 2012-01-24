@@ -44,10 +44,6 @@ class Parser extends JavaTokenParsers {
     val `else`: Parser[String] =
       "else"
     
-    // Something wrapped in parenthesis
-    val bracketsContent: Parser[String] =
-      ""
-    
     val call: Parser[Call] =
       positioned(("call " ~> path ~ ("(" ~> repsep(expr, ", ") <~ ")")) ^^ { case tmpl ~ params => Call(tmpl, params) })
   }
