@@ -30,7 +30,7 @@ class JsDom extends Backend {
     val root :: ns = names
     def sub(names: List[String], processed: List[String]): String = names match {
       case n :: ns => {
-        val p = n :: processed
+        val p = processed :+ n
         val current = p.mkString(".")
         "if (typeof %s == 'undefined') { %s = {}; }\n".format(current, current) + sub(ns, p)
       }
