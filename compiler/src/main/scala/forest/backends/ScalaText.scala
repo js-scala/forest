@@ -6,13 +6,14 @@ import forest.ast._
 /**
  * A compiler to Scala code, generating a function producing a String containing the DOM
  */
-class ScalaText extends Backend {
+class ScalaText(runtime: String) extends Backend {
   
   override def generate(document: Document, namespace: List[String], targetDir: Path) {
     val pkgName = if (namespace.size > 1) namespace.take(namespace.size - 1).mkString(".") else "__root__"
     (targetDir / (namespace.mkString(".") + ".scala")).write(
         """|package %s
-           |object %s {
+           |
+           |object %s extends %s {
            |  def apply(%s): String = {
            |    val out  = new collection.mutable.StringBuilder
            |    %s
@@ -21,7 +22,8 @@ class ScalaText extends Backend {
            |}""".stripMargin.format(
                  pkgName,
                  namespace.last,
-                 (for ((name, kind) <- document.parameters) yield name + ": " + kind.getOrElse("Any")).mkString(", "),
+                 runtime,
+                 (for ((name, kind) <- document.parameters) yield name + ": Json").mkString(", "),
                  node(document.tree)
                )
     )
@@ -52,7 +54,7 @@ class ScalaText extends Backend {
     case Text(content) => "out.append(%s)\n".format(textContent(content))
     case For(it, seq, body) => {
       val out = new collection.mutable.StringBuilder
-      out.append("for (%s <- %s) {\n".format(it, seq.path))
+      out.append("for (%s <- _iterate(%s)) {\n".format(it, seq.path))
       for (n <- body) {
         out.append(node(n))
       }
@@ -61,7 +63,7 @@ class ScalaText extends Backend {
     }
     case If(c, t, e) => {
       val out = new collection.mutable.StringBuilder
-      out.append("if (%s) {\n".format(expr(c)))
+      out.append("if (_test(%s)) {\n".format(expr(c)))
       for (n <- t) {
         out.append(node(n))
       }
@@ -79,12 +81,12 @@ class ScalaText extends Backend {
   
   def textContent(content: List[TextContent]): String = content.map {
       case RawText(t) => "\"\"\"%s\"\"\"".format(t)
-      case e: Expr => expr(e)
+      case e: Expr => "_show(%s)".format(expr(e))
     }.mkString(" + ")
   
   def expr(e: Expr): String = e match {
-    case Data(p) => p
-    case InlineIf(c, t, e) => ("if (%s) { %s }" + e.map { e => " else { %s }".format(expr(e)) }.getOrElse("")).format(c.path, expr(t))
+    case Data(p) => p.split("[.]") reduce ((acc, field) => """_get(%s, "%s")""".format(acc, field))
+    case InlineIf(c, t, e) => ("if (_test(%s)) { %s }" + e.map { e => " else { %s }".format(expr(e)) }.getOrElse("")).format(c.path, expr(t))
     case Literal(l) => "\"\"\"%s\"\"\"".format(l)
   }
 }

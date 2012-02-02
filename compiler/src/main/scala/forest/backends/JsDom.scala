@@ -63,7 +63,7 @@ class JsDom extends Backend {
       val out = new collection.mutable.StringBuilder
       val i, length = symbols.fresh()
       out.append("for (var %s = 0, %s = %s.length ; %s < %s ; %s++) {\n".format(i, length, seq.path, i, length, i))
-      out.append("%s = %s[%s];\n".format(it, seq.path, i))
+      out.append("var %s = %s[%s];\n".format(it, seq.path, i))
       for (n <- body) {
         out.append(node(n, parentName))
       }

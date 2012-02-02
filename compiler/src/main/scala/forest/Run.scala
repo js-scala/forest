@@ -10,7 +10,10 @@ object Run extends App {
   }
   
   val compiler = new Compiler
-  val backend = if (args.size > 2 && args(2) == "js") new JsDom else new ScalaText
+  val backend = args(2) match {
+    case "js" => new JsDom
+    case "scala" => new ScalaText(args(3))
+  }
   val sourceDir = Path(new java.io.File(args(0)))
   val targetDir = Path(new java.io.File(args(1)))
   

@@ -9,15 +9,15 @@ import forest.backends.JsDom
 class CompilerSpec extends Specification {
   
   val compiler = new Compiler
-  val resourcesDir = Path(new File("src/test/resources"))
-  val targetDir = Path(new File("target/test/generated"))
+  val resourcesDir = Path(new File("compiler/src/test/resources"))
+  val targetDir = Path(new File("compiler/target/test/generated"))
   
   targetDir.deleteRecursively(true, true)
   
   "a compiler" should {
     
     "compile a forest file to a Scala function" >> {
-      compiler.compile(resourcesDir / "article.forest", Nil, new ScalaText, targetDir)
+      compiler.compile(resourcesDir / "article.forest", Nil, new ScalaText("forest.Play2Json"), targetDir)
       (targetDir / "article.scala").exists must beTrue
     }
 
@@ -27,7 +27,7 @@ class CompilerSpec extends Specification {
     }
 
     "compile a forest file to a Scala function" >> {
-      compiler.compile(resourcesDir / "variables.forest", Nil, new ScalaText, targetDir)
+      compiler.compile(resourcesDir / "variables.forest", Nil, new ScalaText("forest.Play2Json"), targetDir)
       (targetDir / "variables.scala").exists must beTrue
     }
 
