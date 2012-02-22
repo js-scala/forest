@@ -1,10 +1,10 @@
 package forest.backends
 
-trait JsonOps {
-  type Json
+trait DataOps {
+  type Data
   
-  def _iterate(json: Json): Iterable[Json]
-  def _test(json: Json): Boolean
-  def _show(json: Json): String
-  def _get(json: Json, field: String): Json
+  def _iterate(data: Data): Iterable[Data]
+  def _test(data: Data): Boolean
+  def _show(data: Data): String
+  def _get(data: Data, field: String): Data
 }

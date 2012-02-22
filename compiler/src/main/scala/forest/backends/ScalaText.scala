@@ -23,7 +23,7 @@ class ScalaText(runtime: String) extends Backend {
                  pkgName,
                  namespace.last,
                  runtime,
-                 (for ((name, kind) <- document.parameters) yield name + ": Json").mkString(", "),
+                 (for ((name, kind) <- document.parameters) yield name + ": Data").mkString(", "),
                  node(document.tree)
                )
     )
@@ -54,7 +54,7 @@ class ScalaText(runtime: String) extends Backend {
     case Text(content) => "out.append(%s)\n".format(textContent(content))
     case For(it, seq, body) => {
       val out = new collection.mutable.StringBuilder
-      out.append("for (%s <- _iterate(%s)) {\n".format(it, seq.path))
+      out.append("for (%s <- _iterate(%s)) {\n".format(it, path(seq.path)))
       for (n <- body) {
         out.append(node(n))
       }
@@ -85,8 +85,11 @@ class ScalaText(runtime: String) extends Backend {
     }.mkString(" + ")
   
   def expr(e: Expr): String = e match {
-    case Data(p) => p.split("[.]") reduce ((acc, field) => """_get(%s, "%s")""".format(acc, field))
-    case InlineIf(c, t, e) => ("if (_test(%s)) { %s }" + e.map { e => " else { %s }".format(expr(e)) }.getOrElse("")).format(c.path, expr(t))
+    case Data(p) => path(p)
+    case InlineIf(c, t, e) => ("if (_test(%s)) { %s }" + e.map { e => " else { %s }".format(expr(e)) }.getOrElse("")).format(path(c.path), expr(t))
     case Literal(l) => "\"\"\"%s\"\"\"".format(l)
   }
+  
+  def path(p: String): String =
+    p.split("[.]") reduce ((acc, field) => """_get(%s, "%s")""".format(acc, field))
 }
