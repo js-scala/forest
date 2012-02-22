@@ -23,7 +23,7 @@ class ScalaText(runtime: String) extends Backend {
                  pkgName,
                  namespace.last,
                  runtime,
-                 (for ((name, kind) <- document.parameters) yield name + ": Data").mkString(", "),
+                 (for ((name, kind) <- document.parameters) yield name + ": Exp").mkString(", "),
                  node(document.tree)
                )
     )

@@ -2,8 +2,8 @@ package forest.backends
 
 import play.api.libs.json.{JsValue, JsNumber, JsArray, JsString, JsObject, JsBoolean, JsNull, JsUndefined}
 
-trait Play2Json extends DataOps {
-  type Data = JsValue
+trait Play2Json extends ExpOps {
+  type Exp = JsValue
 
   override def _iterate(json: JsValue): Iterable[JsValue] = json match {
     case JsArray(jsons) => jsons
