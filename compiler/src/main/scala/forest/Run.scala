@@ -10,8 +10,6 @@ object Run extends App {
   
   val compiler = new Compiler
   val backend = args(2) match {
-    case "js" => new JsDom
-    case "scala" => new ScalaText(args(3))
     case "lms" => new Lms
   }
   val sourceDir = Path(new java.io.File(args(0)))

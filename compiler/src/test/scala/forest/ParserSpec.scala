@@ -51,7 +51,7 @@ class ParserSpec extends Specification {
       }
       
       "parameters" >> {
-        parser.parse(parser.parameters, "{article: Article}").get must equalTo (List("article"->Some("Article")))
+        parser.parse(parser.parameters, "{article: Article}").get must equalTo (List("article"->"Article"))
       }
       
       "a whole document" >> {
@@ -60,7 +60,7 @@ class ParserSpec extends Specification {
                                          |  span class="bar baz"
                                          |  a href="/yop"""".stripMargin).get must equalTo (
                                                Document(
-                                                   List("article"->Some("Article")),
+                                                   List("article"->"Article"),
                                                    Tag("div", attrs=Map("class"->List(RawText("foo"))), children=List(
                                                        Tag("span", attrs=Map("class"->List(RawText("bar baz")))),
                                                        Tag("a", attrs=Map("href"->List(RawText("/yop"))))
@@ -70,13 +70,13 @@ class ParserSpec extends Specification {
       }
       
       "a document using the forest expression language" >> {
-        parser.parse(parser.document, """|{article}
+        parser.parse(parser.document, """|{article: Article}
                                          |div class={article.featured ? 'featured'}
                                          |  {for color <- article.colors}
                                          |    span
                                          |      | Color: {color}""".stripMargin).get must equalTo (
                                                Document(
-                                                 List("article"->None),
+                                                 List("article"->"Article"),
                                                  Tag("div", attrs=Map("class"->List(InlineIf(Data("article.featured"), Literal("featured"), None))), children=List(
                                                    For("color", Data("article.colors"), List(
                                                      Tag("span", children=List(
