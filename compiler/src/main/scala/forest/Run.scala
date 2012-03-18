@@ -1,6 +1,5 @@
 package forest
-import forest.backends.ScalaText
-import forest.backends.JsDom
+import forest.backends._
 import scalax.file.Path
 
 object Run extends App {
@@ -13,6 +12,7 @@ object Run extends App {
   val backend = args(2) match {
     case "js" => new JsDom
     case "scala" => new ScalaText(args(3))
+    case "lms" => new Lms
   }
   val sourceDir = Path(new java.io.File(args(0)))
   val targetDir = Path(new java.io.File(args(1)))
