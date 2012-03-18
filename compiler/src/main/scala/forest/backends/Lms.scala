@@ -27,7 +27,7 @@ class Lms extends Backend {
     )
   }
 
-  implicit val quoteNode: Quotable[Node] = new Quotable[Node] {
+  implicit val quoteNode: Quote[Node] = new Quote[Node] {
     override def quote(node: Node) = node match {
       case Tag(name, children, attrs, ref) => {
         "Tag(%s, %s, %s, %s)".format(q(name), q(children), q(attrs), q(ref))
@@ -39,18 +39,18 @@ class Lms extends Backend {
     }
   }
 
-  implicit val quoteTextContent = new Quotable[TextContent] {
+  implicit val quoteTextContent = new Quote[TextContent] {
     override def quote(txt: TextContent) = txt match {
       case RawText(txt) => "RawText(%s)".format(q(txt))
       case e: Expr => quoteExpr.quote(e)
     }
   }
   
-  implicit val quoteExpr: Quotable[Expr] = new Quotable[Expr] {
+  implicit val quoteExpr: Quote[Expr] = new Quote[Expr] {
     override def quote(expr: Expr) = expr match {
       case Data(path) => "Data(%s)".format(path)
     }
   }
 
-  def q[A : Quotable](a: A): String = implicitly[Quotable[A]].quote(a)
+  def q[A : Quote](a: A): String = implicitly[Quote[A]].quote(a)
 }
