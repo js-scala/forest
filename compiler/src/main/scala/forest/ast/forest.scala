@@ -6,7 +6,7 @@ import collection.SortedMap
 /**
  * Root object of the AST.
  */
-case class Document(parameters: List[(String, Option[String])], tree: Node) extends Positional
+case class Document(parameters: List[(String, String)], tree: Node) extends Positional
 
 sealed abstract class Node
 

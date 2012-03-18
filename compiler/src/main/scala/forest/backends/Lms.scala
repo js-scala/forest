@@ -10,18 +10,16 @@ class Lms extends Backend {
         """|package %s
            |
            |import forest.ast._
+           |import virtualization.lms.common.Base
            |
-           |object %s {
+           |trait %s extends Base {
            |  def apply(%s): Rep[Node] = {
            |    %s
            |  }
            |}""".stripMargin.format(
                  pkgName,
                  namespace.last,
-                 (for {
-                    (name, maybeKind) <- document.parameters
-                    kind <- maybeKind // TODO kind should not be an Option
-                  } yield "%s: Rep[%s]".format(name, kind)).mkString(", "),
+                 (for ((name, kind) <- document.parameters) yield "%s: Rep[%s]".format(name, kind)).mkString(", "),
                  q(document.tree)
                )
     )

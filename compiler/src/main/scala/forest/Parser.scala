@@ -101,11 +101,11 @@ class Parser extends JavaTokenParsers {
     )
   }
   
-  val parameter: Parser[(String, Option[String])] =
-    (ident ~ ((": " ~> ident)?)) ^^ { case name ~ kind => (name -> kind) }
+  val parameter: Parser[(String, String)] =
+    (ident ~ (": " ~> ident)) ^^ { case name ~ kind => (name -> kind) }
   
   // Template parameters
-  val parameters: Parser[List[(String, Option[String])]] =
+  val parameters: Parser[List[(String, String)]] =
     wrapped(repsep(parameter, ", "))
   
   val document: Parser[Document] =
