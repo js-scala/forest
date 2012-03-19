@@ -10,8 +10,8 @@ object Quote {
     override def quote(s: String) = "\"\"\"%s\"\"\"".format(s)
   }
 
-  implicit val quoteNumber = new Quote[Number] {
-    override def quote(n: Number) = n.toString
+  implicit def quoteNumber[A : Numeric] = new Quote[A] {
+    override def quote(n: A) = n.toString
   }
 
   implicit def quoteList[A : Quote] = new Quote[List[A]] {
@@ -26,7 +26,7 @@ object Quote {
       if (map.isEmpty) {
         "Map.empty"
       } else {
-        "Map(%s)".format(for ((a, b) <- map) yield implicitly[Quote[A]].quote(a) + "->" + implicitly[Quote[B]].quote(b)).mkString(", ")
+        "Map(%s)".format((for ((a, b) <- map) yield implicitly[Quote[A]].quote(a) + "->" + implicitly[Quote[B]].quote(b)).mkString(", "))
       }
     }
   }
