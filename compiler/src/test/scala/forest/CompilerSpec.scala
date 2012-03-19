@@ -8,7 +8,7 @@ import forest.backends.Lms
 class CompilerSpec extends Specification {
   
   val compiler = new Compiler
-  val resourcesDir = Path(new File("compiler/src/test/resources"))
+  val resourcesDir = Path(new File("compiler/src/resources"))
   val targetDir = Path(new File("compiler/target/test/generated"))
   
   targetDir.deleteRecursively(true, true)
@@ -20,7 +20,7 @@ class CompilerSpec extends Specification {
       (targetDir / "article.scala").exists must beTrue
     }
 
-    "compile a forest file to a Scala virtualizabl function" >> {
+    "compile a forest file to a Scala virtualizable function" >> {
       compiler.compile(resourcesDir / "variables.forest", Nil, new Lms, targetDir)
       (targetDir / "variables.scala").exists must beTrue
     }
