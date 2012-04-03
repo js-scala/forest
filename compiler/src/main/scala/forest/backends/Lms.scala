@@ -12,7 +12,7 @@ class Lms extends Backend {
            |import forest.ast._
            |import virtualization.lms.common.Base
            |
-           |trait %s extends Base {
+           |trait %s { this: Forest =>
            |  def apply(%s): Rep[Node] = {
            |    %s
            |  }
@@ -28,25 +28,25 @@ class Lms extends Backend {
   implicit val quoteNode: Quote[Node] = new Quote[Node] {
     override def quote(node: Node) = node match {
       case Tag(name, children, attrs, ref) => {
-        "Tag(%s, %s, %s, %s)".format(q(name), q(children), q(attrs), q(ref))
+        "tag(%s, %s, %s, %s)".format(q(name), q(children), q(attrs), q(ref))
       }
-      case Text(content) => "Text(%s)".format(q(content))
+      case Text(content) => "text(%s)".format(q(content))
       case If(cond, thenPart, elsePart) => {
-        "If(%s, %s, %s)".format(q(cond), q(thenPart), q(elsePart))
+        "if(%s, %s, %s)".format(q(cond), q(thenPart), q(elsePart))
       }
     }
   }
 
   implicit val quoteTextContent = new Quote[TextContent] {
     override def quote(txt: TextContent) = txt match {
-      case RawText(txt) => "RawText(%s)".format(q(txt))
+      case RawText(txt) => "rawText(%s)".format(q(txt))
       case e: Expr => quoteExpr.quote(e)
     }
   }
   
   implicit val quoteExpr: Quote[Expr] = new Quote[Expr] {
     override def quote(expr: Expr) = expr match {
-      case Data(path) => "Data(%s)".format(path)
+      case Data(path) => path
     }
   }
 

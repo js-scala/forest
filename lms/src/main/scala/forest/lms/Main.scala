@@ -12,7 +12,8 @@ import js._
  */
 trait TemplateFoo { this: Forest =>
   def apply(foo: Rep[String]): Rep[Node] = {
-    tag("div", Map("class" -> List("yop ", foo)))
+    val xs = for (i <- 1 to 5) yield tag("span", Nil, Map("class" -> List(unit(i))))
+    tag("div", List(tag("span", Nil, Map.empty)) ++ xs, Map("class" -> List(unit("yop "), foo)))
   }
 }
 
