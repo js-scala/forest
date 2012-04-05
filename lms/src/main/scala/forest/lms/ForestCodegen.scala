@@ -26,6 +26,22 @@ trait ForestJSCodegen extends JSGenBase {
         stream.append(s"${quote(sym)}.appendChild(${quote(child)});"+"\n")
       }
     }
+    case Tree(root) => {
+      def collectRefs(rootNode: Exp[Node]): List[(String, Exp[Node])] = rootNode match {
+        case Def(Tag(_, children, _, ref)) => {
+          ref.map((_,rootNode)).toList ++ children.flatMap(collectRefs)
+        }
+        case _ => sys.error("You loose.")
+      }
+      val refs = collectRefs(root)
+      if (refs.isEmpty) {
+        emitValDef(sym, quote(root))
+      } else {
+        val jsObject = refs.map { case (n, s) => s""""${n}":${quote(s)}""" }.mkString(",")
+        emitValDef(sym, s"{${jsObject}};")
+      }
+    }
+    case _ => super.emitNode(sym, node)
   }
 }
 
@@ -54,6 +70,9 @@ trait ForestScalaCodegen extends ScalaGenBase {
         val childrenFormatted = children.map(child => s"$${${quote(child)}}").mkString
         emitValDef(sym, "s\"\"\"<%s%s>%s</%s>\"\"\"".format(name, attrsFormatted, childrenFormatted, name))
       }
+    }
+    case Tree(root) => {
+      emitValDef(sym, quote(root))
     }
     case _ => super.emitNode(sym, node)
   }
