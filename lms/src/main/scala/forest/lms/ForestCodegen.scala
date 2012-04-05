@@ -37,7 +37,7 @@ trait ForestJSCodegen extends JSGenBase {
       if (refs.isEmpty) {
         emitValDef(sym, quote(root))
       } else {
-        val jsObject = refs.map { case (n, s) => s""""${n}":${quote(s)}""" }.mkString(",")
+        val jsObject = refs.map { case (n, s) => s"'${n}':${quote(s)}" }.mkString(",")
         emitValDef(sym, s"{${jsObject}};")
       }
     }
