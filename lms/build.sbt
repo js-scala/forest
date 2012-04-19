@@ -17,4 +17,4 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtual
 
 resolvers += ScalaToolsSnapshots
 
-libraryDependencies += "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1"
+libraryDependencies += "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1-SNAPSHOT"
