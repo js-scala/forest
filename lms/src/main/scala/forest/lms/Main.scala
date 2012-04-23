@@ -8,63 +8,68 @@ import java.io.PrintWriter
 /** Business class */
 case class Article(name: String, price: Double, highlighted: Boolean)
 
-// TODO routes & i18n. Don’t use JS trait
-trait Templates { this: Forest with JS with ListOps2 with ArticleOps =>
+/** Convenient package */
+trait ForestPkg extends Forest with JS with ListOps2 with JSTraits
+trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with JSTraitsExp
+
+// TODO routes & i18n. Don’t use JS trait. Don’t extends.
+trait ArticlesDef extends ForestPkg { this: ArticleOps =>
   // TODO always use List, never use SList (but perform optimizations on generated code)
   import collection.immutable.{List => SList}
 
-  def apply(articles: Rep[List[Article]]) = {
+  trait Articles {
 
-  /**
-   * def show(article: Article) =
-   *   <dl class="{if (article.highlighted) "highlighted" else ""}">
-   *     <dt>Name</dt><dd>{article.name}</dd>
-   *     <dt>Price</dt><dd>{article.price}</dd>
-   *   </dl>
-   */
-  val show: Rep[Article => Tree] = fun { article: Rep[Article] =>
-    val name = List(
-        tag("dt", List(text("Name")), Map.empty, None),
-        tag("dd", List(text(article.name)), Map("class"->SList("name")), None)
-    )
-    val price = List(
-        tag("dt", List(text("Price")), Map.empty, None),
-        tag("dd", List(text(article.price, " Euros")), Map.empty, None)
-    )
-    //tree(tag("dl", name ++ price, Map("class"->(if(article.highlighted) List("highlighted") else List(""))), None))
-    tree(tag("dl", name ++ price, Map("class"->SList("article")), Some("article")))
-  }
-
-  /**
-   * def list(articles: List[Article]) =
-   *   <ul>
-   *     for (article <- articles) yield {
-   *       <li>{show(article)}</li>
-   *     }
-   *   </ul>
-   */
-  val list: Rep[List[Article] => Tree] = fun { articles: Rep[List[Article]] =>
-    val items = for (article <- articles) yield {
-      tag("li", List(show(article)), Map.empty, None)
+    /**
+     * def show(article: Article) =
+     *   <dl class="{if (article.highlighted) "highlighted" else ""}">
+     *     <dt>Name</dt><dd>{article.name}</dd>
+     *     <dt>Price</dt><dd>{article.price}</dd>
+     *   </dl>
+     */
+    def show(article: Rep[Article]): Rep[Tree] = {
+      val name = List(
+          tag("dt", List(text("Name")), Map.empty, None),
+          tag("dd", List(text(article.name)), Map("class"->SList("name")), None)
+      )
+      val price = List(
+          tag("dt", List(text("Price")), Map.empty, None),
+          tag("dd", List(text(article.price, " Euros")), Map.empty, None)
+      )
+      //tree(tag("dl", name ++ price, Map("class"->(if(article.highlighted) List("highlighted") else List(""))), None))
+      tree(tag("dl", name ++ price, Map("class"->SList("article")), Some("article")))
     }
-    tree(tag("ul", items, Map.empty, Some("articles")))
-  }
 
-    list(articles)
+    /**
+     * def list(articles: List[Article]) =
+     *   <ul>
+     *     for (article <- articles) yield {
+     *       <li>{show(article)}</li>
+     *     }
+     *   </ul>
+     */
+    def list(articles: Rep[List[Article]]): Rep[Tree] = {
+      val items = for (article <- articles) yield {
+        tag("li", List(show(article)), Map.empty, None)
+      }
+      tree(tag("ul", items, Map.empty, Some("articles")))
+    }
   }
+  implicit def __articles(a: Rep[Articles]) = repProxy(a)
+  //object Articles extends Articles
 }
 
-object Main extends App {
+object Main extends App with ArticlesDef with ForestPkgExp with ArticleOpsExp { self =>
 
-  new Templates with JSExp with ListOps2Exp with ForestExp with ArticleOpsExp { self =>
-    val codegen = new ForestJSCodegen with JSGenArticleOps { val IR: self.type = self }
-    codegen.emitSource(apply _, "tmpl", new java.io.PrintWriter(System.out))
+  def main(article: Rep[Article]) = {
+    val newArticles = register[Articles](self)
+    val articles = newArticles()
+    repProxy(articles).show(article)
   }
 
-  // TODO Remove JSExp ^^
-  new Templates with JSExp with ListOps2Exp with ForestExp with ArticleOpsExp { self =>
-    val codegen = new ForestScalaCodegen with ScalaGenFunctions with ScalaGenArticleOps { val IR: self.type = self }
-    codegen.emitSource(apply _, "tmpl", new java.io.PrintWriter(System.out))
-  }
+  val jsCodegen = new JSGenForest with JSGenArticleOps with JSGenTraits { val IR: self.type  = self }
+  jsCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))
+
+  val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps { val IR: self.type = self }
+  scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))
 
 }

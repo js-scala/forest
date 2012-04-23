@@ -8,7 +8,7 @@ import java.io.PrintWriter
  * JavaScript code generator for `ForestExp` expressions
  */
 // TODO I should not extend JSGen but a more general trait
-trait ForestJSCodegen extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => // FIXME Why can’t I depend on JSGenListOps2 instead of mixing it?
+trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => // FIXME Why can’t I depend on JSGenListOps2 instead of mixing it?
   val IR: ForestExp with JSExp with ListOps2Exp
   import IR._
 
@@ -81,7 +81,7 @@ trait ForestJSCodegen extends JSGen with JSGenListOps2 { //this: JSGenListOps2 =
  */
 // TODO I should extend a more general trait than ScalaGenEffect
 // TODO Express dependency on ScalaGenFunctions
-trait ForestScalaCodegen extends ScalaGenEffect with ScalaGenListOps2 { // this: ScalaGenListOps2 =>
+trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: ScalaGenListOps2 =>
   val IR: ForestExp with ListOps2Exp
   import IR._
 

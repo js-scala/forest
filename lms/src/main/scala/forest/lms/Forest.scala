@@ -5,7 +5,7 @@ import virtualization.lms.common._
 /**
  * Forest DSL interface
  */
-trait Forest extends Base { this: ListOps2 => // TODO define a single trait defining the common language to use between server and client side
+trait Forest { this: Base =>
 
   type Node
   type Tree
@@ -35,14 +35,14 @@ trait Forest extends Base { this: ListOps2 => // TODO define a single trait defi
   implicit def treeToNode(tree: Rep[Tree]): Rep[Node]
 
   // HACK : Sometimes I need to provide a Manifest for nodes or tree
-  implicit def nodeManifest[T <: Node]: Manifest[T] = implicitly[Manifest[AnyRef]].asInstanceOf[Manifest[T]]
-  implicit def treeManifest[T <: Tree]: Manifest[T] = implicitly[Manifest[AnyRef]].asInstanceOf[Manifest[T]]
+  implicit def nodeManifest[T <: Node]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
+  implicit def treeManifest[T <: Tree]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
 }
 
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest { this: BaseExp with ListOps2Exp =>
+trait ForestExp extends Forest { this: BaseExp =>
 
   case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
   case class Text(content: List[Exp[Any]]) extends Def[Node]
