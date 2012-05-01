@@ -115,6 +115,13 @@ trait ListOps2Exp extends ListOps2 with EffectExp {
 
 }
 
+trait ListOps2Opt extends ListOps2Exp {
+  override def list_concat[A : Manifest](xs1: Exp[List[A]], xs2: Exp[List[A]]): Exp[List[A]] = (xs1, xs2) match {
+    case (Def(ConstList(xs1)), Def(ConstList(xs2))) => ConstList(xs1 ++ xs2)
+    case _ => super.list_concat(xs1, xs2)
+  }
+}
+
 trait ScalaGenListOps2 extends ScalaGenBase {
   val IR: ListOps2Exp
   import IR._
@@ -144,7 +151,7 @@ trait JSGenListOps2 extends JSGenBase {
     }
     // TODO reuse JSArrays
     case ListMap(l, x, b) => {
-      stream.println("var " + quote(sym) + "=" + quote(l) + ".map(")
+      stream.print("var " + quote(sym) + "=" + quote(l) + ".map(")
       stream.println("function(" + quote(x) + "){")
       emitBlock(b)
       stream.println("return " + quote(getBlockResult(b)))

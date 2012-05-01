@@ -127,7 +127,7 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
 
   // On Scala backend, trees are just strings
   override def remap[A](m: Manifest[A]) = {
-    if (m.toString.endsWith("#forest.lms.ForestExp$Tree")) { // FIXME There should be a cleaner way to check this
+    if (m == manifest[Tree]) {
       "String"
     } else {
       super.remap(m)
