@@ -34,7 +34,11 @@ trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp 
   /** Module definition */
   case class ModuleDef[A : Manifest](methods: List[MethodDef]) extends Def[Module[A]]
   case class MethodDef(name: String, params: List[(Sym[Any], String)], body: Exp[Any])
-  case class Self[A : Manifest]() extends Exp[A]
+  case class Self[A : Manifest]() extends Exp[A] {
+    private var _self: Exp[Module[A]] = _
+    def self = _self
+    def self_=(a: Exp[Module[A]]) { _self = a }
+  }
   case class Get[A : Manifest](module: Exp[Module[A]]) extends Exp[A]
 
   // TODO Use the new reflection API
@@ -46,14 +50,17 @@ trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp 
     assert(classClazz != null, "Unable to find implementation for trait " + interfaceClazz.getName)
     assert(interfaceClazz.getInterfaces.length <= 1, "Inheritance is not supported")
 
+    val selfExp = Self[A]()
+    val self = proxyTrait[A](selfExp, None) // TODO handle inheritance
     val methods = for (method <- classClazz.getDeclaredMethods if method.getName != "$init$") yield {
       val params = for (p <- method.getParameterTypes.drop(1).toList) yield (fresh[Any], p.getName) // FIXME I should use something else than the class name (a manifest?)
-      val self = proxyTrait[A](Self[A](), None) // TODO handle inheritance
       val args = (self :: params.map(_._1)).toArray
       MethodDef(method.getName, params, reifyEffects(method.invoke(null, args: _*).asInstanceOf[Exp[Any]]))
     }
 
-    ModuleDef[A](methods.toList)
+    val m = toAtom(ModuleDef[A](methods.toList))
+    selfExp.self = m
+    m
   }
 
   override def syms(e: Any): List[Sym[Any]] = e match {
@@ -106,7 +113,7 @@ trait JSGenModules extends JSGenBase {
   }
 
   override def quote(x: Exp[Any]): String = x match {
-    case Self() => "this" // TODO something more robust
+    case s @ Self() => quote(s.self)
     case Get(module) => quote(module)
     case _ => super.quote(x)
   }
