@@ -41,7 +41,7 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
           tag("dd", List(text(article.price, " Euros")), Map.empty, None)
       )
       //tree(tag("dl", name ++ price, Map("class"->(if(article.highlighted) List("highlighted") else List(""))), None))
-      tree(tag("dl", name ++ price, Map("class"->SList("article")), Some("article")))
+      tree(tag("dl", name ++ price, Map("class"->SList("article")), Some("root")))
     }
 
     /**
@@ -56,7 +56,7 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
       val items = for (article <- articles) yield {
         tag("li", List(show(article)), Map.empty, None)
       }
-      tree(tag("ul", items, Map.empty, Some("articles")))
+      tree(tag("ul", items, Map.empty, Some("root")))
     }
   }
   def Articles = module[Articles] // TODO I’d like to just write “object Articles extends Articles”
@@ -67,14 +67,12 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
 object Main extends App {
 
   object JSProg extends ArticlesDef with ForestPkgExp with ArticleOpsExp {
-    def main(article: Rep[Article]) = {
-      Articles.show(article)
-    }
+    def articles() = Articles
   }
 
   // The JavaScript code generation
   val jsCodegen = new JSGenForest with JSGenArticleOps with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
-  jsCodegen.emitSource(JSProg.main _, "tmpl", new java.io.PrintWriter(System.out))
+  jsCodegen.emitSource0(JSProg.articles _, "Articles", new PrintWriter("target/show-article.js"))
 
   // The Scala code generation (FIXME really needed? Why not follow the “InScala” way? I think code generation allows to perform more optimizations)
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
@@ -88,11 +86,52 @@ object Main extends App {
     }
 
     def main(articles: List[Article]) {
-      println(Articles.list(articles))
+      val target = new PrintWriter("target/index.html")
+      target.println("""<!DOCTYPE html>
+        <html>
+          <head></head>
+          <body>
+            <h1>Articles</h1>
+            %s
+            <button type="button" id="add-article">Add an article</button>
+            <button type="button" id="fresh-list">Fresh list</button>
+            <script type="text/javascript" src="show-article.js"></script>
+            <script type="text/javascript">
+              (function () {
+                var addBtn = document.getElementById('add-article');
+                addBtn.onclick = function () {
+                  var articleTree = Articles().show({
+                    name: 'Item',
+                    price: 123.45,
+                    highlighted: false
+                  });
+                  var li = document.createElement('li');
+                  li.appendChild(articleTree.root);
+                  document.querySelector('ul').appendChild(li);
+                };
+                var freshBtn = document.getElementById('fresh-list');
+                freshBtn.onclick = function () {
+                  var tree = Articles().list([{
+                    name: 'Item 1',
+                    price: 12.34,
+                    highlighted: true
+                  }, {
+                    name: 'Item 2',
+                    price: 23.45,
+                    highlighted: false
+                  }]);
+                  var ul = document.querySelector('ul');
+                  ul.parentNode.replaceChild(tree.root, ul);
+                };
+              })();
+            </script>
+          </body>
+        </html>""".format(Articles.list(articles)))
+      target.close()
     }
 
   }
 
-  ScalaProg.main(List(Article("Something", 42.0, false)))
+  ScalaProg.main(List(Article("Something", 42.0, false), Article("Foobar", 0, true)))
 
 }
