@@ -7,9 +7,6 @@ trait Modules { self: Base with JSProxyBase =>
 
   /** A Module is a singleton implementing a given type A */
   abstract class Module[A]
-  object Module {
-    implicit def toA[A <: AnyRef : Manifest](m: Rep[Module[A]]): A = moduleToA(m)
-  }
 
   /**
    * Returns the module of a given trait (which must not be abstract).
@@ -24,9 +21,10 @@ trait Modules { self: Base with JSProxyBase =>
    */
   def module[A <: AnyRef : Manifest]: Rep[Module[A]]
 
-  protected def moduleToA[A <: AnyRef : Manifest](m: Rep[Module[A]]): A
+  protected implicit def moduleToA[A <: AnyRef : Manifest](m: Rep[Module[A]]): A
 
   implicit val __base: Base = self
+
 }
 
 trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp =>
@@ -81,7 +79,7 @@ trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp 
     case _ => super.symsFreq(e)
   }
 
-  override protected def moduleToA[A <: AnyRef : Manifest](m: Exp[Module[A]]): A = repProxy(Get(m))
+  override protected implicit def moduleToA[A <: AnyRef : Manifest](m: Exp[Module[A]]): A = repProxy(Get(m))
 
   // Syntactic sugar on top of the JSProxy API
   def proxyTrait[T <: AnyRef](x: Rep[T], parentCtor: Option[Rep[Any]])(implicit outer: Base, m: Manifest[T]): T = proxyTrait(x, parentCtor, outer)
@@ -125,15 +123,13 @@ trait JSGenModules extends JSGenBase {
 
 trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
 
-  case class ModuleW[A](val a: A) extends Module[A]
+  case class ModuleW[A](a: A) extends Module[A]
 
-  override def module[A <: AnyRef : Manifest]: Rep[Module[A]] =  {
-    new ModuleW(create[A])
-  }
+  override def module[A <: AnyRef : Manifest]: Module[A] =  new ModuleW(create[A])
 
   def create[A : Manifest]: A = sys.error("Unable to create a value of type %s".format(manifest[A].erasure.getName))
 
-  override protected def moduleToA[A <: AnyRef : Manifest](m: Rep[Module[A]]): A = m match {
+  override protected implicit def moduleToA[A <: AnyRef : Manifest](m: Module[A]): A = m match {
     case ModuleW(a) => a
     case _ => sys.error("That’s bad.")
   }
