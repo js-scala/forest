@@ -36,10 +36,13 @@ trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp 
   case class MethodDef(name: String, params: List[(Sym[Any], String)], body: Exp[Any])
   case class Self[A : Manifest]() extends Exp[A] {
     private var _self: Exp[Module[A]] = _
-    def self = _self
+    def self = {
+      if (_self == null) sys.error("Oops. Self has not been set up!")
+      else _self
+    }
     def self_=(a: Exp[Module[A]]) { _self = a }
   }
-  case class Get[A : Manifest](module: Exp[Module[A]]) extends Exp[A]
+  case class Get[A : Manifest](module: Exp[Module[A]]) extends Exp[A] // TODO Unify Get and Self
 
   // TODO Use the new reflection API
   override def module[A <: AnyRef : Manifest]: Exp[Module[A]] = {
@@ -52,7 +55,7 @@ trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp 
 
     val selfExp = Self[A]()
     val self = proxyTrait[A](selfExp, None) // TODO handle inheritance
-    val methods = for (method <- classClazz.getDeclaredMethods if method.getName != "$init$") yield {
+    val methods = for (method <- classClazz.getDeclaredMethods if method.getName != "$init$") yield { // FIXME Generate initialization code?
       val params = for (p <- method.getParameterTypes.drop(1).toList) yield (fresh[Any], p.getName) // FIXME I should use something else than the class name (a manifest?)
       val args = (self :: params.map(_._1)).toArray
       MethodDef(method.getName, params, reifyEffects(method.invoke(null, args: _*).asInstanceOf[Exp[Any]]))
@@ -120,4 +123,19 @@ trait JSGenModules extends JSGenBase {
 
 }
 
-trait ScalaGenModules
+trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
+
+  case class ModuleW[A](val a: A) extends Module[A]
+
+  override def module[A <: AnyRef : Manifest]: Rep[Module[A]] =  {
+    new ModuleW(create[A])
+  }
+
+  def create[A : Manifest]: A = sys.error("Unable to create a value of type %s".format(manifest[A].erasure.getName))
+
+  override protected def moduleToA[A <: AnyRef : Manifest](m: Rep[Module[A]]): A = m match {
+    case ModuleW(a) => a
+    case _ => sys.error("That’s bad.")
+  }
+
+}

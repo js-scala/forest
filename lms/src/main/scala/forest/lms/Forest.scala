@@ -5,7 +5,7 @@ import virtualization.lms.common._
 /**
  * Forest DSL interface
  */
-trait Forest { this: Base =>
+trait Forest extends Base {
 
   type Node
   type Tree
@@ -42,7 +42,7 @@ trait Forest { this: Base =>
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest { this: BaseExp =>
+trait ForestExp extends Forest with BaseExp {
 
   case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
   case class Text(content: List[Exp[Any]]) extends Def[Node]

@@ -55,6 +55,19 @@ trait ScalaGenArticleOps extends ScalaGenBase {
   }
 }
 
+trait ArticleOpsInScala extends ArticleOps with JSInScala {
+
+  override implicit def repToArticleOps(a: Article): ArticleOpsCls =
+    new ArticleOpsInScala(a)
+
+  class ArticleOpsInScala(a: Article) extends ArticleOpsCls {
+    override def name: String = a.name
+    override def price: Double = a.price
+    override def highlighted: Boolean = a.highlighted
+  }
+
+}
+
 
 
 // --- Rep[List] support
@@ -160,4 +173,16 @@ trait JSGenListOps2 extends JSGenBase {
     case ListConcat(l1, l2) => emitValDef(sym, quote(l1) + ".concat(" + quote(l2) + ")")
     case _ => super.emitNode(sym, rhs)
   }
+}
+
+trait ListOps2InScala extends ListOps2 with JSInScala {
+
+  def list_new[A : Manifest](xs: Seq[A]): List[A] = xs.toList
+
+  def list_map[A : Manifest, B : Manifest](f: A => B)(xs: List[A]): List[B] = xs map f
+
+  def list_concat[A : Manifest](xs1: List[A], xs2: List[A]): List[A] = xs1 ++ xs2
+
+  def list_mkString[A : Manifest](xs: List[A]): String = xs.mkString
+
 }
