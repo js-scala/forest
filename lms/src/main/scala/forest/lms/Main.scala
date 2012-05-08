@@ -64,19 +64,35 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
 
 // --- Usage
 
-object Main extends App with ArticlesDef with ForestPkgExp with ArticleOpsExp { self =>
+object Main extends App {
 
-  // The program
-  def main(article: Rep[Article]) = {
-    Articles.show(article)
+  object JSProg extends ArticlesDef with ForestPkgExp with ArticleOpsExp {
+    def main(article: Rep[Article]) = {
+      Articles.show(article)
+    }
   }
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenForest with JSGenArticleOps with JSGenModules with JSGenProxy { val IR: self.type  = self }
-  jsCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))
+  val jsCodegen = new JSGenForest with JSGenArticleOps with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
+  jsCodegen.emitSource(JSProg.main _, "tmpl", new java.io.PrintWriter(System.out))
 
-  // The Scala code generation (FIXME really needed? Why not follow the “InScala” way?)
+  // The Scala code generation (FIXME really needed? Why not follow the “InScala” way? I think code generation allows to perform more optimizations)
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
   scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))*/
+
+  object ScalaProg extends ArticlesDef with ForestInScala with ArticleOpsInScala with ModulesInScala with JSProxyInScala with ListOps2InScala {
+
+    override def create[A : Manifest]: A = {
+      if (manifest[A] equals manifest[Articles]) (new Articles {}).asInstanceOf[A]
+      else super.create[A]
+    }
+
+    def main(articles: List[Article]) {
+      println(Articles.list(articles))
+    }
+
+  }
+
+  ScalaProg.main(List(Article("Something", 42.0, false)))
 
 }
