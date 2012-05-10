@@ -9,15 +9,9 @@ import java.io.PrintWriter
 
 case class Article(name: String, price: Double, highlighted: Boolean)
 
-
-// --- Convenient packages
-
-trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
-trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
-
 // --- Example of template definition
 
-// TODO routes & i18n. Don’t use JS trait. Don’t use extends (ok, extending is mandatory to share the implicit scope…).
+// TODO routes & i18n. Don’t use JS trait.
 trait ArticlesDef extends ForestPkg { this: ArticleOps =>
   // TODO always use List, never use SList (but perform optimizations on generated code)
   import collection.immutable.{List => SList}
@@ -33,7 +27,7 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
      */
     def show(article: Rep[Article]): Rep[Tree] = {
       val name = List(
-          tag("dt", List(text("Name")), Map.empty, None),
+          tag("dt", List(text("Name")), Map.empty, None), // TODO prevent code optimization: the node creation must be local to this function
           tag("dd", List(text(article.name)), Map("class"->SList("name")), None)
       )
       val price = List(

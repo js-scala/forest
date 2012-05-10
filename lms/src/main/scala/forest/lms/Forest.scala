@@ -1,6 +1,7 @@
 package forest.lms
 
 import virtualization.lms.common._
+import js._
 
 /**
  * Forest DSL interface
@@ -57,3 +58,9 @@ trait ForestExp extends Forest with BaseExp {
   case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
   def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
 }
+
+
+// --- Convenient packages
+
+trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
+trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
