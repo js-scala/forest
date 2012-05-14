@@ -1,6 +1,6 @@
-package forest.backends
+package forest.backend
 
-trait Quote[A] {
+trait Quote[-A] {
   def quote(a: A): String
 }
 

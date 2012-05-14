@@ -1,18 +1,27 @@
 package forest
 
-import forest.backends.Backend
+import forest.backend.Lms
 import scalax.file.Path
 
 class Compiler {
-  
+
   private val parser = new Parser
 
-  def compile(source: Path, namespace: List[String], backend: Backend, outputDir: Path) {
-    val result = parser.parseAll(parser.document, source.slurpString)
-    if (result.successful) {
-      backend.generate(result.get, namespace :+ source.simpleName, outputDir)
-    } else {
-      println("Huston, we have a problem: " + result)
+  /**
+   * Compile all .forest files found (recursively) in `sourceDir` into `outputDir`
+   */
+  def compile(sourceDir: Path, outputDir: Path) {
+    for (source <- sourceDir ** "*.forest") {
+      val segments = source.relativize(sourceDir).segments
+      compile(source, segments.take(segments.size - 1).toList, outputDir)
     }
   }
+
+  def compile(source: Path, namespace: List[String], outputDir: Path) {
+    val result = parser.parseAll(parser.document, source.slurpString)
+    result.map { document =>
+      Lms.generate(document, namespace :+ source.simpleName, outputDir)
+    }.getOrElse(println("Huston, we have a problem."))
+  }
+
 }

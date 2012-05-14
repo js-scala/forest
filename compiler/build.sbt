@@ -1,8 +1,10 @@
 name := "forest"
 
-mainClass := Some("forest.Run")
+organization := "forest"
 
-version := "0.1"
+version := "0.1-SNAPSHOT"
+
+mainClass := Some("forest.Run")
 
 libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "1.6.1" % "test",
