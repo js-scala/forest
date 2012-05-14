@@ -111,4 +111,12 @@ class Parser extends JavaTokenParsers {
   val document: Parser[Document] =
     positioned((parameters ~ blankLines ~ tree(0)) ^^ { case p ~ _ ~ t => Document(p, t) })
   
+
+  def parse(input: String): Either[String, Document] = {
+    parseAll(document, input) match {
+      case Success(document, _) => Right(document)
+      case err: NoSuccess => Left(err.msg)
+    }
+  }
+
 }

@@ -18,10 +18,12 @@ class Compiler {
   }
 
   def compile(source: Path, namespace: List[String], outputDir: Path) {
-    val result = parser.parseAll(parser.document, source.slurpString)
-    result.map { document =>
-      Lms.generate(document, namespace :+ source.simpleName, outputDir)
-    }.getOrElse(println("Huston, we have a problem."))
+    parser.parse(source.slurpString) match {
+      case Right(document) => Lms.generate(document, namespace :+ source.simpleName, outputDir)
+      case Left(error) => println("Unable to parse file '%s': %s".format(source.name, error))
+    }
   }
 
 }
+
+object Compiler extends Compiler
