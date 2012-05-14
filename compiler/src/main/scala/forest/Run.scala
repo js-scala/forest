@@ -5,18 +5,12 @@ import scalax.file.Path
 object Run extends App {
   
   if (args.size < 2) {
-    sys.error("Missing parameters")
+    sys.error("Usage: run <source> <target>")
   }
   
   val compiler = new Compiler
-  val backend = args(2) match {
-    case "lms" => new Lms
-  }
   val sourceDir = Path(new java.io.File(args(0)))
   val targetDir = Path(new java.io.File(args(1)))
   
-  for (source <- sourceDir ** "*.forest") {
-    val segments = source.relativize(sourceDir).segments
-    compiler.compile(source, segments.take(segments.size - 1).toList, backend, targetDir)
-  }
+  compiler.compile(sourceDir, targetDir)
 }
