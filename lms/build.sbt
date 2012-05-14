@@ -1,6 +1,8 @@
 name := "forest-lms"
 
-version := "0.1"
+organization := "forest"
+
+version := "0.1-SNAPSHOT"
 
 scalaHome <<= baseDirectory { dir =>
   val props = new java.util.Properties()

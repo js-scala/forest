@@ -81,12 +81,14 @@ trait ListOps2 extends Base {
   implicit def repToOps[A : Manifest](xs: Rep[List[A]]) = new ListOps2Cls(xs)
 
   class ListOps2Cls[A : Manifest](xs: Rep[List[A]]) {
+    def flatMap[B : Manifest](f: Rep[A] => Rep[List[B]]) = list_flatMap(f)(xs)
     def map[B : Manifest](f: Rep[A] => Rep[B]) = list_map(f)(xs)
     def ++ (xs2: Rep[List[A]]) = list_concat(xs, xs2)
     def mkString = list_mkString(xs)
   }
 
   def list_new[A : Manifest](xs: Seq[Rep[A]]): Rep[List[A]]
+  def list_flatMap[A : Manifest, B : Manifest](f: Rep[A] => Rep[List[B]])(xs: Rep[List[A]]): Rep[List[B]]
   def list_map[A : Manifest, B : Manifest](f: Rep[A] => Rep[B])(xs: Rep[List[A]]): Rep[List[B]]
   def list_concat[A : Manifest](xs1: Rep[List[A]], xs2: Rep[List[A]]): Rep[List[A]]
   def list_mkString[A : Manifest](xs: Rep[List[A]]): Rep[String]
@@ -95,7 +97,12 @@ trait ListOps2 extends Base {
 trait ListOps2Exp extends ListOps2 with EffectExp {
 
   def list_new[A : Manifest](xs: Seq[Rep[A]]) = ConstList(xs)
-  def list_map[A : Manifest, B : Manifest](f: Exp[A] => Exp[B])(xs: Rep[List[A]]) = {
+  def list_flatMap[A : Manifest, B : Manifest](f: Exp[A] => Exp[List[B]])(xs: Exp[List[A]]) = {
+    val x = fresh[A]
+    val b = reifyEffects(f(x))
+    reflectEffect(ListFlatMap(xs, x, b), Alloc() andAlso summarizeEffects(b).star)
+  }
+  def list_map[A : Manifest, B : Manifest](f: Exp[A] => Exp[B])(xs: Exp[List[A]]) = {
     val x = fresh[A]
     val b = reifyEffects(f(x))
     reflectEffect(ListMap(xs, x, b), Alloc() andAlso summarizeEffects(b).star)
@@ -104,24 +111,28 @@ trait ListOps2Exp extends ListOps2 with EffectExp {
   def list_mkString[A : Manifest](xs: Exp[List[A]]) = ListMkString(xs)
 
   case class ConstList[A : Manifest](xs: Seq[Rep[A]]) extends Def[List[A]]
+  case class ListFlatMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Exp[List[B]]) extends Def[List[B]]
   case class ListMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Exp[B]) extends Def[List[B]]
   case class ListConcat[A : Manifest](l1: Exp[List[A]], l2: Exp[List[A]]) extends Def[List[A]]
   case class ListMkString[A : Manifest](l: Exp[List[A]]) extends Def[String]
 
   override def syms(e: Any): List[Sym[Any]] = e match {
     case ConstList(xs) => xs.flatMap(syms).toList
+    case ListFlatMap(l, _, b) => syms(l) ::: syms(b)
     case ListMap(l, _, b) => syms(l) ::: syms(b)
     case _ => super.syms(e)
   }
 
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
     case ConstList(xs) => xs.flatMap(effectSyms).toList
+    case ListFlatMap(_, x, b) => x :: effectSyms(b)
     case ListMap(_, x, b) => x :: effectSyms(b)
     case _ => super.boundSyms(e)
   }
 
   override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
     case ConstList(xs) => xs.flatMap(freqNormal).toList
+    case ListFlatMap(l, _, b) => freqNormal(l) ::: freqHot(b)
     case ListMap(l, _, b) => freqNormal(l) ::: freqHot(b)
     case _ => super.symsFreq(e)
   }
@@ -143,6 +154,12 @@ trait ScalaGenListOps2 extends ScalaGenBase {
     case ConstList(xs) => {
       emitValDef(sym, "List(" + xs.map(quote).mkString(", ") + ")")
     }
+    case ListFlatMap(l, x, b) => {
+      stream.println("val " + quote(sym) + " = " + quote(l) + ".flatMap { " + quote(x) + " => ")
+      emitBlock(b)
+      stream.println(quote(getBlockResult(b)))
+      stream.println("}")
+    }
     case ListMap(l, x, b) => {
       stream.println("val " + quote(sym) + " = " + quote(l) + ".map { " + quote(x) + " =>")
       emitBlock(b)
@@ -163,6 +180,16 @@ trait JSGenListOps2 extends JSGenBase {
       emitValDef(sym, values.map(quote).mkString("[", ",", "]") + ";")
     }
     // TODO reuse JSArrays
+    case ListFlatMap(l, x, b) => {
+      stream.println("var " + quote(sym) + "= [];")
+      val i = fresh[Int]
+      stream.println("for(var " + quote(i) + " = 0 ; " + quote(i) + " < " + quote(l) + ".length ; " + quote(i) + "++){")
+      stream.println(quote(sym) + ".splice.apply(" + quote(sym) + ", [" + quote(sym) + ".length, 0].concat((function(" + quote(x) + "){")
+      emitBlock(b)
+      stream.println("return " + quote(getBlockResult(b)))
+      stream.println("})(" + quote(l) + "[" + quote(i) + "])));")
+      stream.println("}")
+    }
     case ListMap(l, x, b) => {
       stream.print("var " + quote(sym) + "=" + quote(l) + ".map(")
       stream.println("function(" + quote(x) + "){")
@@ -178,6 +205,8 @@ trait JSGenListOps2 extends JSGenBase {
 trait ListOps2InScala extends ListOps2 with JSInScala {
 
   def list_new[A : Manifest](xs: Seq[A]): List[A] = xs.toList
+
+  def list_flatMap[A : Manifest, B : Manifest](f: A => List[B])(xs: List[A]): List[B] = xs flatMap f
 
   def list_map[A : Manifest, B : Manifest](f: A => B)(xs: List[A]): List[B] = xs map f
 
