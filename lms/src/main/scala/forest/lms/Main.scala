@@ -12,7 +12,7 @@ case class Article(name: String, price: Double, highlighted: Boolean)
 // --- Example of template definition
 
 // TODO routes & i18n. Don’t use JS trait.
-trait ArticlesDef extends ForestPkg { this: ArticleOps =>
+trait Articles extends ForestPkg { this: ArticleOps =>
   // TODO always use List, never use SList (but perform optimizations on generated code)
   import collection.immutable.{List => SList}
 
@@ -60,7 +60,7 @@ trait ArticlesDef extends ForestPkg { this: ArticleOps =>
 
 object Main extends App {
 
-  object JSProg extends ArticlesDef with ForestPkgExp with ArticleOpsExp {
+  object JSProg extends Articles with ForestPkgExp with ArticleOpsExp {
     def articles() = Articles
   }
 
@@ -72,7 +72,7 @@ object Main extends App {
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
   scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))*/
 
-  object ScalaProg extends ArticlesDef with ForestInScala with ArticleOpsInScala with ModulesInScala with JSProxyInScala with ListOps2InScala {
+  object ScalaProg extends Articles with ForestInScala with ArticleOpsInScala with ModulesInScala with JSProxyInScala with ListOps2InScala {
 
     override def create[A : Manifest]: A = {
       if (manifest[A] equals manifest[Articles]) (new Articles {}).asInstanceOf[A]
