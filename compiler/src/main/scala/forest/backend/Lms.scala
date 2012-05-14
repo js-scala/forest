@@ -10,7 +10,6 @@ class Lms {
     (targetDirectory / (namespace.mkString(".") + ".scala")).write(
         """|package %s
            |
-           |import forest.ast._
            |import forest.lms._
            |
            |trait %s extends ForestPkg {
@@ -42,7 +41,7 @@ class Lms {
       case If(cond, thenPart, elsePart) => {
         "if (%s) %s else %s".format(q(cond), q(thenPart), q(elsePart))
       }
-      case For(it, seq, body) => "%s.flatMap{ %s => %s }".format(q(seq), q(it), q(body))
+      case For(it, seq, body) => "%s.flatMap{ %s => %s }".format(q(seq), it, q(body))
       case Call(callee, args) => "%s(%s)".format(callee, args.map(arg => q(arg)).mkString(", "))
     }
   }
