@@ -29,3 +29,5 @@ trait ForestInScala extends Forest with JSInScala {
   implicit def treeToNode(tree: String): String = tree
 
 }
+
+trait ForestInScalaPkg extends ForestInScala with ListOps2InScala with ModulesInScala with JSProxyInScala

@@ -13,61 +13,59 @@ import java.io.PrintWriter
 // TODO Do something with selectDynamic
 trait ArticleOps extends Base {
 
-  implicit def repToArticleOps(a: Rep[Article]): ArticleOpsCls
+  implicit def repToArticleOps(a: Rep[Article]) = new ArticleOpsCls(a)
 
-  abstract class ArticleOpsCls {
-    def name: Rep[String]
-    def price: Rep[Double]
-    def highlighted: Rep[Boolean]
-  }
-}
-
-trait ArticleOpsExp extends ArticleOps with BaseExp {
-
-  def repToArticleOps(a: Exp[Article]) = new ArticleOpsClsExp(a)
-
-  class ArticleOpsClsExp(article: Exp[Article]) extends ArticleOpsCls {
-    def name = Field[Article, String](article, "name")
-    def price = Field[Article, Double](article, "price")
-    def highlighted = Field[Article, Boolean](article, "highlighted")
+  class ArticleOpsCls(a: Rep[Article]) {
+    def name: Rep[String] = article_name(a)
+    def price: Rep[Double] = article_price(a)
+    def highlighted: Rep[Boolean] = article_highlighted(a)
   }
 
-  case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
+  def article_name(a: Rep[Article]): Rep[String]
+  def article_price(a: Rep[Article]): Rep[Double]
+  def article_highlighted(a: Rep[Article]): Rep[Boolean]
 }
 
-trait JSGenArticleOps extends JSGenBase {
-  val IR: ArticleOpsExp
-  import IR._
-
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
-    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
-    case _ => super.emitNode(sym, rhs)
-  }
-}
-
-trait ScalaGenArticleOps extends ScalaGenBase {
-  val IR: ArticleOpsExp
-  import IR._
-
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
-    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
-    case _ => super.emitNode(sym, rhs)
-  }
-}
 
 trait ArticleOpsInScala extends ArticleOps with JSInScala {
 
-  override implicit def repToArticleOps(a: Article): ArticleOpsCls =
-    new ArticleOpsInScala(a)
-
-  class ArticleOpsInScala(a: Article) extends ArticleOpsCls {
-    override def name: String = a.name
-    override def price: Double = a.price
-    override def highlighted: Boolean = a.highlighted
-  }
+  override def article_name(a: Article): String = a.name
+  override def article_price(a: Article): Double = a.price
+  override def article_highlighted(a: Article): Boolean = a.highlighted
 
 }
 
+trait ArticleOpsExp extends ArticleOps with FieldsExp {
+
+  override def article_name(a: Rep[Article]) = Field[Article, String](a, "name")
+  override def article_price(a: Rep[Article]) = Field[Article, Double](a, "price")
+  override def article_highlighted(a: Rep[Article]) = Field[Article, Boolean](a, "highlighted")
+
+}
+
+trait FieldsExp extends BaseExp {
+  case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
+}
+
+trait JSGenFields extends JSGenBase {
+  val IR: FieldsExp
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case _ => super.emitNode(sym, rhs)
+  }
+}
+
+trait ScalaGenFields extends ScalaGenBase {
+  val IR: FieldsExp
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case _ => super.emitNode(sym, rhs)
+  }
+}
 
 
 // --- Rep[List] support

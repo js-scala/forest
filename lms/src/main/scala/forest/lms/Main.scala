@@ -60,19 +60,17 @@ trait Articles extends ForestPkg { this: ArticleOps =>
 
 object Main extends App {
 
-  object JSProg extends Articles with ForestPkgExp with ArticleOpsExp {
-    def articles() = Articles
-  }
+  object JSProg extends Articles with ForestPkgExp with ArticleOpsExp
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenForest with JSGenArticleOps with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
-  jsCodegen.emitSource0(JSProg.articles _, "Articles", new PrintWriter("target/show-article.js"))
+  val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
+  jsCodegen.emitSource0(() => JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
 
   // The Scala code generation (FIXME really needed? Why not follow the “InScala” way? I think code generation allows to perform more optimizations)
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
   scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))*/
 
-  object ScalaProg extends Articles with ForestInScala with ArticleOpsInScala with ModulesInScala with JSProxyInScala with ListOps2InScala {
+  object ScalaProg extends Articles with ForestInScalaPkg with ArticleOpsInScala {
 
     override def create[A : Manifest]: A = {
       if (manifest[A] equals manifest[Articles]) (new Articles {}).asInstanceOf[A]

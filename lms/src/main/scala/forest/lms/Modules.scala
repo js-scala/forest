@@ -27,7 +27,7 @@ trait Modules { self: Base with JSProxyBase =>
 
 }
 
-trait ModulesExp extends BaseExp with Modules { this: EffectExp with JSProxyExp =>
+trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
 
   /** Module definition */
   case class ModuleDef[A : Manifest](methods: List[MethodDef]) extends Def[Module[A]]
@@ -89,7 +89,7 @@ import js._
 import java.io.PrintWriter
 
 trait JSGenModules extends JSGenBase {
-  val IR: ModulesExp with BaseExp with JSLiteralExp
+  val IR: ModulesExp
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
