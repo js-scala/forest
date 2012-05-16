@@ -1,0 +1,5 @@
+{name: String}
+div class=child
+  input type=text name=children value={name} placeholder="Name of your children (e.g. Bob)"
+  button type=button
+    | Delete
