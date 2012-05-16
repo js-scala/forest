@@ -63,4 +63,4 @@ trait ForestExp extends Forest with BaseExp {
 // --- Convenient packages
 
 trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
-trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
+trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp with FieldsExp
