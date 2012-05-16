@@ -1,0 +1,9 @@
+{person: Person}
+form
+  p
+    | Type the name of each of your children
+  div class=children
+    {for c <- person.children}
+      {call child(c)}
+  button type=button class="add-child"
+    | Add a child
