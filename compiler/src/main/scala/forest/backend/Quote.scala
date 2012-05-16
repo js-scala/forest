@@ -6,7 +6,9 @@ trait Quote[-A] {
 
 object Quote {
 
-  implicit val quoteString = new Quote[String] {
+  def apply[A : Quote]: Quote[A] = implicitly[Quote[A]]
+
+  implicit object quoteString extends Quote[String] {
     override def quote(s: String) = "\"\"\"%s\"\"\"".format(s)
   }
 
@@ -16,8 +18,8 @@ object Quote {
 
   implicit def quoteList[A : Quote] = new Quote[List[A]] {
     override def quote(as: List[A]) = as match {
-      case Nil => "Nil"
-      case _ => "List(%s)".format(as.map(implicitly[Quote[A]].quote(_)).mkString(", "))
+      case Nil => "List()"
+      case _ => "List(%s)".format(as.map(Quote[A].quote(_)).mkString(", "))
     }
   }
 
@@ -26,7 +28,7 @@ object Quote {
       if (map.isEmpty) {
         "Map.empty"
       } else {
-        "Map(%s)".format((for ((a, b) <- map) yield implicitly[Quote[A]].quote(a) + "->" + implicitly[Quote[B]].quote(b)).mkString(", "))
+        "Map(%s)".format((for ((a, b) <- map) yield Quote[A].quote(a) + "->" + implicitly[Quote[B]].quote(b)).mkString(", "))
       }
     }
   }
@@ -34,7 +36,7 @@ object Quote {
   implicit def quoteOption[A : Quote] = new Quote[Option[A]] {
     override def quote(option: Option[A]) = option match {
       case None => "None"
-      case Some(x) => "Some(%s)".format(implicitly[Quote[A]].quote(x))
+      case Some(x) => "Some(%s)".format(Quote[A].quote(x))
     }
   }
 }
