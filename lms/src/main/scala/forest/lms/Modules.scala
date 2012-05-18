@@ -65,16 +65,19 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
   }
 
   override def syms(e: Any): List[Sym[Any]] = e match {
+    //case ModuleDef(methods) => methods.flatMap(syms)
     case MethodDef(_, _, body) => syms(body)
     case _ => super.syms(e)
   }
 
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
-    case MethodDef(_, params, _) => params.map(_._1).flatMap(syms)
+    //case ModuleDef(methods) => methods.flatMap(effectSyms)
+    case MethodDef(_, params, body) => params.map(_._1).flatMap(syms) ::: effectSyms(body)
     case _ => super.boundSyms(e)
   }
 
   override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
+    //case ModuleDef(methods) => methods.flatMap(freqNormal)
     case MethodDef(_, _, body) => freqHot(body)
     case _ => super.symsFreq(e)
   }
@@ -132,6 +135,36 @@ trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
   override protected implicit def moduleToA[A <: AnyRef : Manifest](m: Module[A]): A = m match {
     case ModuleW(a) => a
     case _ => sys.error("That’s bad.")
+  }
+
+}
+
+trait ScalaGenModules extends ScalaGenBase {
+  val IR: ModulesExp
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+
+    case ModuleDef(methods) => {
+      stream.println("object " + quote(sym) + " {")
+      for (method <- methods) {
+        val params = method.params.map { p => "%s: %s".format(quote(p._1), p._2) }.mkString("(", ", ", ")")
+        stream.println("def %s%s = {".format(method.name, params)) // TODO Omit “=” for methods returning Unit, add parens for side effecting methods with arity zero
+        emitBlock(method.body)
+        stream.println("}")
+      }
+      stream.println("")
+      stream.println("}")
+    }
+
+    case _ => super.emitNode(sym, rhs)
+
+  }
+
+  override def quote(x: Exp[Any]): String = x match {
+    case s @ Self() => quote(s.self)
+    case Get(module) => quote(module)
+    case _ => super.quote(x)
   }
 
 }
