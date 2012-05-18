@@ -59,9 +59,9 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
       MethodDef(method.getName, params, reifyEffects(method.invoke(null, args: _*).asInstanceOf[Exp[Any]]))
     }
 
-    val m = toAtom(ModuleDef[A](methods.toList))
+    val m = ModuleDef[A](methods.toList)
     selfExp.self = m
-    m
+    reflectEffect(m)
   }
 
   override def syms(e: Any): List[Sym[Any]] = e match {
