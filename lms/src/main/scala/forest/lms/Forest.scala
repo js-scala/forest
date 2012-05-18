@@ -59,7 +59,7 @@ trait ForestExp extends Forest with BaseExp {
   def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
 
 
-  override def syms(x: Any) = x match {
+  /*override def syms(x: Any) = x match {
     case Tree(root) => syms(root)
     case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(syms).toList
     case Text(content) => content.flatMap(syms)
@@ -78,7 +78,7 @@ trait ForestExp extends Forest with BaseExp {
     case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(freqNormal).toList
     case Text(content) => content.flatMap(freqNormal).toList
     case _ => super.symsFreq(x)
-  }
+  }*/
 
 }
 
