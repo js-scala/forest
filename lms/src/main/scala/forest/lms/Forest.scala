@@ -57,6 +57,29 @@ trait ForestExp extends Forest with BaseExp {
 
   case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
   def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
+
+
+  override def syms(x: Any) = x match {
+    case Tree(root) => syms(root)
+    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(syms).toList
+    case Text(content) => content.flatMap(syms)
+    case _ => super.syms(x)
+  }
+
+  override def boundSyms(x: Any) = x match {
+    case Tree(root) => boundSyms(root)
+    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(boundSyms).toList
+    case Text(content) => content.flatMap(boundSyms)
+    case _ => super.boundSyms(x)
+  }
+
+  override def symsFreq(x: Any) = x match {
+    case Tree(root) => freqNormal(root)
+    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(freqNormal).toList
+    case Text(content) => content.flatMap(freqNormal).toList
+    case _ => super.symsFreq(x)
+  }
+
 }
 
 

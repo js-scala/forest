@@ -8,9 +8,6 @@ import js._
 import java.io.PrintWriter
 
 
-// --- Case classes support
-
-// TODO Do something with selectDynamic
 trait ArticleOps extends Base {
 
   implicit def repToArticleOps(a: Rep[Article]) = new ArticleOpsCls(a)
@@ -43,6 +40,10 @@ trait ArticleOpsExp extends ArticleOps with FieldsExp {
 
 }
 
+
+// --- Case classes support
+
+// TODO Do something with selectDynamic
 trait FieldsExp extends BaseExp {
   case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
 }
