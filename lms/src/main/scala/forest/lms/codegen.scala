@@ -139,3 +139,7 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
     }
   }
 }
+
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFields with ScalaGenModules {
+  val IR: ForestPkgExp
+}
