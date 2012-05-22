@@ -61,21 +61,21 @@ trait ForestExp extends Forest with BaseExp {
 
   /*override def syms(x: Any) = x match {
     case Tree(root) => syms(root)
-    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(syms).toList
+    case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(syms) ++ syms(children)).toList
     case Text(content) => content.flatMap(syms)
     case _ => super.syms(x)
   }
 
   override def boundSyms(x: Any) = x match {
-    case Tree(root) => boundSyms(root)
-    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(boundSyms).toList
-    case Text(content) => content.flatMap(boundSyms)
+    case Tree(root) => syms(root)
+    case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(syms) ++ syms(children)).toList
+    case Text(content) => content.flatMap(syms)
     case _ => super.boundSyms(x)
   }
 
   override def symsFreq(x: Any) = x match {
     case Tree(root) => freqNormal(root)
-    case Tag(_, _, attrs, _) => attrs.values.flatten.flatMap(freqNormal).toList
+    case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(freqNormal) ++ freqNormal(children)).toList
     case Text(content) => content.flatMap(freqNormal).toList
     case _ => super.symsFreq(x)
   }*/
