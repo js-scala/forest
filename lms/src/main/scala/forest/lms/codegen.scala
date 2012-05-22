@@ -76,6 +76,11 @@ trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => //
   }
 }
 
+trait JSGenForestPkg extends JSGenForest with JSGenFields with JSGenProxy with JSGenModules {
+  val IR: ForestPkgExp
+}
+
+
 /**
  * Scala code generator for `ForestExp` expressions
  */
