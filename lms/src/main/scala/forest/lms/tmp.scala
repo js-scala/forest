@@ -43,7 +43,7 @@ trait ArticleOpsExp extends ArticleOps with FieldsExp {
 
 // --- Case classes support
 
-// TODO Do something with selectDynamic
+// TODO Do something with selectDynamic, or unify with JSProxy
 trait FieldsExp extends BaseExp {
   case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
 }
@@ -212,5 +212,31 @@ trait ListOps2InScala extends ListOps2 with JSInScala {
   def list_concat[A : Manifest](xs1: List[A], xs2: List[A]): List[A] = xs1 ++ xs2
 
   def list_mkString[A : Manifest](xs: List[A]): String = xs.mkString
+
+}
+
+
+// --- JSProxy support
+
+trait ScalaGenProxy extends ScalaGenBase with ScalaGenEffect {
+  val IR: JSProxyExp
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+
+  case MethodCall(receiver, method, args) =>
+    emitValDef(sym, quote(receiver) + "." + method + args.map(quote).mkString("(", ", ", ")"))
+
+  case SuperMethodCall(receiver, _, method, args) =>
+    emitValDef(sym, "super." + method + args.map(quote).mkString("(", ", ", ")"))
+
+  case FieldAccess(receiver, field) =>
+    emitValDef(sym, quote(receiver) + "." + field)
+
+  case FieldUpdate(receiver, field, value) =>
+    emitValDef(sym, quote(receiver) + "." + field + " = " + quote(value))
+
+  case _ => super.emitNode(sym, rhs)
+  }
 
 }
