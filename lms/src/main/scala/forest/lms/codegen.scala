@@ -45,9 +45,8 @@ trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => //
       }
     }
 
-    case Text(content) => {
+    case Text(content) =>
       emitValDef(sym, "document.createTextNode(%s);".format(content.map(quote).mkString("+")))
-    }
 
     case Tree(root) => {
       def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = rootNode match {
@@ -85,7 +84,6 @@ trait JSGenForestPkg extends JSGenForest with JSGenFields with JSGenProxy with J
  * Scala code generator for `ForestExp` expressions
  */
 // TODO I should extend a more general trait than ScalaGenEffect
-// TODO Express dependency on ScalaGenFunctions
 trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: ScalaGenListOps2 =>
   val IR: ForestExp with ListOps2Exp
   import IR._
@@ -115,17 +113,11 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
       }
     }
 
-    case Text(content) => {
-      emitValDef(sym, content.map(quote).mkString(" + "))
-    }
+    case Text(content) => emitValDef(sym, content.map(quote).mkString(" + "))
 
-    case Tree(root) => {
-      emitValDef(sym, quote(root))
-    }
+    case Tree(root) => emitValDef(sym, quote(root))
 
-    case TreeRoot(tree) => {
-      emitValDef(sym, quote(tree))
-    }
+    case TreeRoot(tree) => emitValDef(sym, quote(tree))
 
     case _ => super.emitNode(sym, node)
   }
@@ -140,6 +132,6 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
   }
 }
 
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFields with ScalaGenModules {
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFields with ScalaGenProxy with ScalaGenModules {
   val IR: ForestPkgExp
 }
