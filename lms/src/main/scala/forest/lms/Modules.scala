@@ -61,23 +61,20 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
 
     val m = ModuleDef[A](methods.toList)
     selfExp.self = m
-    reflectEffect(m)
+    m
   }
 
   override def syms(e: Any): List[Sym[Any]] = e match {
-    //case ModuleDef(methods) => methods.flatMap(syms)
     case MethodDef(_, _, body) => syms(body)
     case _ => super.syms(e)
   }
 
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
-    //case ModuleDef(methods) => methods.flatMap(effectSyms)
     case MethodDef(_, params, body) => params.map(_._1).flatMap(syms) ::: effectSyms(body)
     case _ => super.boundSyms(e)
   }
 
   override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
-    //case ModuleDef(methods) => methods.flatMap(freqNormal)
     case MethodDef(_, _, body) => freqHot(body)
     case _ => super.symsFreq(e)
   }

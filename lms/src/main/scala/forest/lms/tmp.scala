@@ -180,7 +180,7 @@ trait JSGenListOps2 extends JSGenBase {
     }
     // TODO reuse JSArrays
     case ListFlatMap(l, x, b) => {
-      stream.println("var " + quote(sym) + "= [];")
+      stream.println("var " + quote(sym) + " = [];")
       val i = fresh[Int]
       stream.println("for(var " + quote(i) + " = 0 ; " + quote(i) + " < " + quote(l) + ".length ; " + quote(i) + "++){")
       stream.println(quote(sym) + ".splice.apply(" + quote(sym) + ", [" + quote(sym) + ".length, 0].concat((function(" + quote(x) + "){")
