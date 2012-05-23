@@ -16,24 +16,23 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
 
     case Tag(name, children, attrs, _) => {
       val attrsFormatted = (for ((name, value) <- attrs) yield {
-          // value is a list of string literals or symbols
-          if (value.isEmpty) {
-            s" $name"
-          } else {
-            val v = value.map {
-              case Const(lit) => lit.toString
-              case s: Sym[_] => s"$${${quote(s)}}"
-            }.mkString
-            s" $name='$v'"
-          }
-        }).mkString
+        // value is a list of string literals or symbols
+        // TODO dramatically reduce the number of concatenations
+        if (value.isEmpty) {
+          "\" " + name + "\""
+        } else {
+          val v = value.map {
+            case Const(lit) => "\"" + lit.toString.replace("\"", "\\\"") + "\""
+            case s: Sym[_] => quote(s)
+          }.mkString(" + ")
+          "\" " + name + "=\\\"\" + " + v + " + \"\\\"\""
+        }
+      }).mkString(" + ")
       children match {
-        case Def(ConstList(xs)) if xs.isEmpty => {
-          emitValDef(sym, "s\"<%s%s />\"".format(name, attrsFormatted))
-        }
-        case children => {
-          emitValDef(sym, "s\"<%s%s>\" + %s.mkString + \"</%s>\"".format(name, attrsFormatted, quote(children), name))
-        }
+        case Def(ConstList(xs)) if xs.isEmpty =>
+          emitValDef(sym, "\"<%s\" + %s + \" />\"".format(name, if (attrsFormatted == "") "\"\"" else attrsFormatted))
+        case _ =>
+          emitValDef(sym, "\"<%s\" + %s + \">\" + %s.mkString + \"</%s>\"".format(name, if (attrsFormatted == "") "\"\"" else attrsFormatted, quote(children), name))
       }
     }
 
