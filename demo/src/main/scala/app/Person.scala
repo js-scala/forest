@@ -1,11 +1,10 @@
 package app
 
 import forest.lms._
-import views.Form
 
 case class Person(children: List[String])
 
-object Person extends Form with ForestInScalaPkg with PersonInScala with FormInScala {
+object Person {
 
   def edit(p: Person): String =
     """|<!DOCTYPE html>
@@ -17,6 +16,6 @@ object Person extends Form with ForestInScalaPkg with PersonInScala with FormInS
        |    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
        |    <script src="person.js"></script>
        |  </body>
-       |</html>""".stripMargin.format(Form.person(p))
+       |</html>""".stripMargin.format(views.Form.person(p))
 
 }

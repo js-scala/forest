@@ -1,10 +1,9 @@
 package app
 
-
 import scala.virtualization.lms.common.Base
 import forest.lms._
 import js._
-import views.Form
+
 
 trait PersonOps extends Base {
 
@@ -24,20 +23,4 @@ trait PersonOpsExp extends PersonOps with FieldsExp {
 
 trait PersonInScala extends PersonOps with JSInScala {
   override def person_children(p: Person): List[String] = p.children
-}
-
-
-
-trait FormInScala extends Form with ForestInScalaPkg { this: PersonOps =>
-
-  override def create[A : Manifest]: A = {
-    if (manifest[A] equals manifest[Form]) (new Form {}).asInstanceOf[A]
-    else super.create[A]
-  }
-
-}
-
-
-trait JSGenForestPkg extends JSGenForest with JSGenFields with JSGenProxy with JSGenModules {
-  val IR: ForestPkgExp
 }

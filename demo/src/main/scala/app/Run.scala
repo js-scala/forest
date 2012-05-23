@@ -3,7 +3,6 @@ package app
 import java.io.PrintWriter
 import forest.lms._
 import js._
-import views.Form
 
 object Run extends App {
 
@@ -14,9 +13,5 @@ object Run extends App {
   val out = new PrintWriter("target/index.html")
   out.print(html)
   out.close()
-
-  val views = new Form with ForestPkgExp with PersonOpsExp
-  val jsCodegen = new JSGenForestPkg { val IR: views.type  = views }
-  jsCodegen.emitSource0(() => views.Form, "Form", new PrintWriter("target/views.js"))
 
 }
