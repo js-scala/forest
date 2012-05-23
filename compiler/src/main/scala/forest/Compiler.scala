@@ -31,7 +31,7 @@ class Compiler {
       }
     }
     (outputDir / (sourceDir.simpleName + ".scala")).write(
-        """|package views // TODO remove that
+        """|package ir // TODO remove that
            |
            |import forest.lms._
            |%s
@@ -41,7 +41,6 @@ class Compiler {
            |  trait %s {
            |    %s
            |  }
-           |  lazy val %s = module[%s]
            |}""".stripMargin.format(
                (for (`import` <- imports) yield "import %s".format(`import`)).mkString("\n"),
                sourceDir.simpleName,
