@@ -1,5 +1,5 @@
 {name: String}
-div class=child
+div class=child /root
   input type=text name=children value={name} placeholder="Name of your children (e.g. Bob)"
-  button type=button
+  button type=button /delete
     | Delete

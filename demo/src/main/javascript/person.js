@@ -7,6 +7,6 @@
   // Add a child
   $('form button.add-child').on('click', function () {
     var field = Form().child('');
-    $('form .children').append(field);
+    $('form .children').append(field.root);
   })
 })();
