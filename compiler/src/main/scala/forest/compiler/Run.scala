@@ -1,4 +1,4 @@
-package forest
+package forest.compiler
 
 import scalax.file.Path
 

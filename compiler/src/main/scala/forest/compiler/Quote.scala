@@ -1,4 +1,4 @@
-package forest.backend
+package forest.compiler
 
 trait Quote[-A] {
   def quote(a: A): String
