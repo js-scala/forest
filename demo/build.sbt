@@ -13,7 +13,7 @@ scalaVersion := "2.10.0-virtualized-SNAPSHOT"
 
 resolvers += ScalaToolsSnapshots
 
-libraryDependencies += "forest" %% "forest-lms" % "0.1-SNAPSHOT"
+libraryDependencies += "forest" %% "forest" % "0.1-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 

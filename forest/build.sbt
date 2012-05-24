@@ -1,4 +1,4 @@
-name := "forest-lms"
+name := "forest"
 
 organization := "forest"
 

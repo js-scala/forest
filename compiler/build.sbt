@@ -1,4 +1,4 @@
-name := "forest"
+name := "compiler"
 
 organization := "forest"
 
