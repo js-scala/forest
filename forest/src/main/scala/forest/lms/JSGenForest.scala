@@ -48,24 +48,14 @@ trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => //
     case Text(content) =>
       emitValDef(sym, "document.createTextNode(%s);".format(content.map(quote).mkString("+")))
 
-    case Tree(root) => {
-      def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = rootNode match {
-        case Def(Tag(_, children, _, ref)) => {
-          ref.map(_ -> rootNode).toMap// TODO ++ children.flatMap(collectRefs)
-        }
-        // FIXME What’s this case?
-        case Def(Reflect(Tag(_, children, _, ref), _, _)) => {
-          ref.map(_ -> rootNode).toMap
-        }
-        case _ => sys.error("Really?")
-      }
-      val refs = collectRefs(root)
-      if (refs.isEmpty) {
+    case tree @ Tree(root) => {
+      if (tree.refs.isEmpty) {
         // No reference found: just return the root node itself. FIXME Return an object `{ root: root }`?
         emitValDef(sym, quote(root))
       } else {
-        // Otherwise return a literal object containing all references. TODO Reuse JSLiteral
-        emitNode(sym, JSLiteralDef(refs.toList)) // FIXME Is it the right way to reuse JSLiteral code generator?
+        // Otherwise return a literal object containing all references.
+        // TODO if there is no reference on the root node, create one with name “root”
+        emitNode(sym, JSLiteralDef(tree.refs.toList)) // FIXME Is it the right way to reuse JSLiteral code generator?
       }
     }
 
