@@ -1,6 +1,5 @@
-package forest
+package forest.compiler
 
-import forest.backend.Lms
 import scalax.file.Path
 
 class Compiler {

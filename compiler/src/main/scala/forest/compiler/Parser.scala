@@ -1,7 +1,7 @@
-package forest
+package forest.compiler
 
-import util.parsing.combinator.JavaTokenParsers
-import ast._
+import forest.ast._
+import scala.util.parsing.combinator.JavaTokenParsers
 
 class Parser extends JavaTokenParsers {
   

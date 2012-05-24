@@ -1,11 +1,12 @@
-package forest.backend
+package forest.compiler
 
 import forest.ast._
 import scalax.file.Path
 
+/**
+ * Lms backend
+ */
 class Lms {
-
-  import Lms._
 
   def generate(document: Document, name: String, targetDirectory: Path): String = {
     """|def %s(%s): Rep[Tree] = {

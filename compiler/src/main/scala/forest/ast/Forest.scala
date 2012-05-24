@@ -1,7 +1,6 @@
 package forest.ast
 
 import scala.util.parsing.input.Positional
-import collection.SortedMap
 
 /**
  * Root object of the AST.
