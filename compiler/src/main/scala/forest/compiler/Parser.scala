@@ -71,11 +71,14 @@ class Parser extends JavaTokenParsers {
     (Xml.attr ~ (('=' ~> (quotedValue | unquotedValue))?)) ^^ { case key ~ value => key -> value.getOrElse(Nil) }
   
   val attrs: Parser[Map[String, List[TextContent]]] =
-    repsep(attr, space+) ^^ { as => as.toMap }
+    rep1sep(attr, space+) ^^ { as => as.toMap }
+  
+  val reference: Parser[String] =
+    "/" ~> ident
   
   // Beginning of a HTML tag: name and attributes
-  val tagPrefix: Parser[(String,Map[String, List[TextContent]])] =
-    (Xml.tagName ~ ((space ~> attrs)?)) ^^ { case name ~ attrs => (name, attrs.getOrElse(Map.empty)) }
+  val tagPrefix: Parser[(String,Map[String, List[TextContent]], Option[String])] =
+    (Xml.tagName ~ opt(space ~> attrs) ~ opt(space ~> reference)) ^^ { case name ~ attrs ~ ref => (name, attrs.getOrElse(Map.empty), ref) }
   
   val text: Parser[Text] =
     positioned(("| " ~> textContent('\0')) ^^ Text)
@@ -93,7 +96,7 @@ class Parser extends JavaTokenParsers {
     def sibling(d: Int): Parser[Node] = blankLines ~> tree(d)
     
     indent(n)(in) flatMapWithNext ( depth => // current node depth
-        positioned((tagPrefix ~ children(depth)) ^^ { case (name, attrs) ~ children => Tag(name, children, attrs) })
+        positioned((tagPrefix ~ children(depth)) ^^ { case (name, attrs, ref) ~ children => Tag(name, children, attrs, ref) })
       | positioned((wrapped(Forest.forGenerator) ~ children(depth)) ^^ { case ident ~ data ~ children => For(ident, data, children) })
       | positioned((wrapped(Forest.`if`) ~ children(depth) ~ ((blankLines ~> repN(depth, space) ~> wrapped(Forest.`else`) ~> children(depth))?)) ^^ { case expr ~ thenChildren ~ elseChildren => If(expr, thenChildren, elseChildren) })
       | positioned(wrapped(Forest.call))
