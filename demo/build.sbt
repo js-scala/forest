@@ -18,7 +18,7 @@ libraryDependencies += "forest" %% "forest" % "0.1-SNAPSHOT"
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 
 sourceGenerators in Compile <+= (sourceDirectory in Compile, sourceManaged in Compile) map { (sourceDir, targetDir) =>
-  forest.Compiler.compile(sourceDir / "forest" / "views" / "Form", targetDir, Seq("app._"), Seq("PersonOps"))
+  forest.compiler.Compiler.compile(sourceDir / "forest" / "views" / "Form", targetDir, Seq("app._"), Seq("PersonOps"))
   (targetDir ** "*.scala").get.map(_.getAbsoluteFile)
 }
 
