@@ -2,6 +2,7 @@ package forest
 
 import org.specs2.mutable.Specification
 import ast._
+import compiler.Parser
 
 class ParserSpec extends Specification {
 
@@ -14,8 +15,8 @@ class ParserSpec extends Specification {
       }
       
       "tags with attributes" >> {
-        parser.parse(parser.tagPrefix, """span class=foo""").get must equalTo ("span", Map("class"->List(RawText("foo"))))
-        parser.parse(parser.tagPrefix, """span class="foo" id="bar"""").get must equalTo ("span", Map("class"->List(RawText("foo")), "id"->List(RawText("bar"))))
+        parser.parse(parser.tagPrefix, """span class=foo""").get must equalTo ("span", Map("class"->List(RawText("foo"))), None)
+        parser.parse(parser.tagPrefix, """span class="foo" id="bar"""").get must equalTo ("span", Map("class"->List(RawText("foo")), "id"->List(RawText("bar"))), None)
       }
       
       "spaces" >> {
@@ -52,6 +53,10 @@ class ParserSpec extends Specification {
       
       "parameters" >> {
         parser.parse(parser.parameters, "{article: Article}").get must equalTo (List("article"->"Article"))
+      }
+      
+      "node references" >> {
+        parser.parse(parser.tree(0), "div /ref").get must equalTo (Tag("div", List.empty, Map.empty, Some("ref")))
       }
       
       "a whole document" >> {
