@@ -43,20 +43,40 @@ trait Forest extends Base {
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with BaseExp {
-
-  case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
-  case class Text(content: List[Exp[Any]]) extends Def[Node]
-
-  case class Tree(root: Exp[Node]) extends Def[Tree]
+trait ForestExp extends Forest with BaseExp { this: EffectExp with ListOps2Exp =>
 
   override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = Tag(name, children, attrs, ref)
   override def text(content: List[Exp[Any]]) = Text(content)
 
   override def tree(root: Exp[Node]) = Tree(root)
 
-  case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
   def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
+
+  case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
+
+  case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
+  case class Text(content: List[Exp[Any]]) extends Def[Node]
+
+  case class Tree(root: Exp[Node]) extends Def[Tree] {
+    lazy val refs: Map[String, Exp[Node]] = {
+      def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = {
+        def collectRefs2(ref: Option[String], childrenExp: Exp[List[Node]]): Map[String, Exp[Node]] = {
+          val children = childrenExp match {
+            case Def(ConstList(children)) => children
+            case _ => Nil
+          }
+          ref.map(_ -> rootNode).toMap ++ children.flatMap(collectRefs)
+        }
+        rootNode match {
+          case Def(Tag(_, children, _, ref)) => collectRefs2(ref, children)
+          case Def(Reflect(Tag(_, children, _, ref), _, _)) => collectRefs2(ref, children)
+          case Def(Text(_)) | Def(Reflect(Text(_), _, _)) => Map.empty // We don’t care of text node for now
+          case _ => sys.error("Don’t do that again. Please.")
+        }
+      }
+      collectRefs(root)
+    }
+  }
 
 
   override def syms(x: Any) = x match {
