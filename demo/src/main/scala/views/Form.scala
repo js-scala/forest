@@ -13,13 +13,10 @@ object Form {
     val jsCodegen = new JSGenForestPkg { val IR: Ir.type = Ir }
     jsCodegen.emitSource0(() => module[Form], "Form", new java.io.PrintWriter("target/views.js"))
 
-    private val form = new Form {}
-    def child = compile(form.child)
-    def person = compile(form.person)
+    def person = compile((new Form {}).person)
 
   }
 
-  def child = Ir.child
   def person = Ir.person
 
 }

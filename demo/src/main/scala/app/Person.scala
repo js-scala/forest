@@ -1,7 +1,5 @@
 package app
 
-import forest.lms._
-
 case class Person(children: List[String])
 
 object Person {
