@@ -9,10 +9,20 @@ import java.io.PrintWriter
 
 case class Article(name: String, price: Double, highlighted: Boolean)
 
+trait ArticleOps extends Base with Fields {
+  class ArticleOps(implicit article: Rep[Article]) extends Fields[Article] {
+    def name = field[String]("name")
+    def price = field[Double]("price")
+    def highlighted = field[Boolean]("highlighted")
+  }
+  implicit def repArticleToOps(article: Rep[Article]) = new ArticleOps()(article)
+}
+
+
 // --- Example of template definition
 
 // TODO routes & i18n. Don’t use JS trait.
-trait Articles extends ForestPkg { this: ArticleOps =>
+trait Articles extends ForestPkg with ArticleOps {
   // TODO always use List, never use SList (but perform optimizations on generated code)
   import collection.immutable.{List => SList}
 
@@ -60,17 +70,16 @@ trait Articles extends ForestPkg { this: ArticleOps =>
 
 object Main extends App {
 
-  object JSProg extends Articles with ForestPkgExp with ArticleOpsExp
+  object JSProg extends Articles with ForestPkgExp with FieldsExp
 
   // The JavaScript code generation
   val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
   jsCodegen.emitSource0(() => JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
 
-  // The Scala code generation (FIXME really needed? Why not follow the “InScala” way? I think code generation allows to perform more optimizations)
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
   scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))*/
 
-  object ScalaProg extends Articles with ForestInScalaPkg with ArticleOpsInScala {
+  object ScalaProg extends Articles with ForestInScalaPkg with FieldsInScala {
 
     override def create[A : Manifest]: A = {
       if (manifest[A] equals manifest[Articles]) (new Articles {}).asInstanceOf[A]

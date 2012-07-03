@@ -32,7 +32,7 @@ trait Forest extends Base {
    * Isn’t a `Node` already a `Tree`? In Scala, yes. In JavaScript, no: a `Tree` is an object containing references to some nodes.
    * @param root Tree root node
    */
-  def tree(root: Rep[Node]): Rep[Tree] // FIXME How to force `root` to be a Rep[Tag]?
+  def tree(root: Rep[Node]): Rep[Tree]
   implicit def treeToNode(tree: Rep[Tree]): Rep[Node]
 
   // HACK : Sometimes I need to provide a Manifest for nodes or tree
@@ -95,4 +95,4 @@ trait ForestExp extends Forest with BaseExp { this: EffectExp with ListOps2Exp =
 // --- Convenient packages
 
 trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
-trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp with FieldsExp
+trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp

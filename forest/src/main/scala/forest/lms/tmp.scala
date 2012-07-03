@@ -7,45 +7,63 @@ import virtualization.lms.internal._
 import js._
 import java.io.PrintWriter
 
-
-trait ArticleOps extends Base {
-
-  implicit def repToArticleOps(a: Rep[Article]) = new ArticleOpsCls(a)
-
-  class ArticleOpsCls(a: Rep[Article]) {
-    def name: Rep[String] = article_name(a)
-    def price: Rep[Double] = article_price(a)
-    def highlighted: Rep[Boolean] = article_highlighted(a)
-  }
-
-  def article_name(a: Rep[Article]): Rep[String]
-  def article_price(a: Rep[Article]): Rep[Double]
-  def article_highlighted(a: Rep[Article]): Rep[Boolean]
-}
-
-
-trait ArticleOpsInScala extends ArticleOps with JSInScala {
-
-  override def article_name(a: Article): String = a.name
-  override def article_price(a: Article): Double = a.price
-  override def article_highlighted(a: Article): Boolean = a.highlighted
-
-}
-
-trait ArticleOpsExp extends ArticleOps with FieldsExp {
-
-  override def article_name(a: Rep[Article]) = Field[Article, String](a, "name")
-  override def article_price(a: Rep[Article]) = Field[Article, Double](a, "price")
-  override def article_highlighted(a: Rep[Article]) = Field[Article, Boolean](a, "highlighted")
-
-}
-
-
 // --- Case classes support
 
-// TODO Do something with selectDynamic, or unify with JSProxy
-trait FieldsExp extends BaseExp {
+/*trait CaseClasses extends Base {
+  case class CaseClass[A](a: Rep[A]) extends Struct[Rep] {
+    def selectDynamic[B : Manifest](n: String): Rep[B] = field[A, B](a, n)
+  }
+  def asCaseClass[A](a: Rep[A]): CaseClass[A] = CaseClass[A](a)
+  def field[A, B : Manifest](a: Rep[A], n: String): Rep[B]
+}
+
+trait CaseClassesInScala extends CaseClasses with JSInScala {
+  def field[A, B : Manifest](a: A, n: String): B = a.getClass.getField(n).get(a).asInstanceOf[B]
+}
+
+trait CaseClassesExp extends BaseExp with CaseClasses {
+
   case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
+
+  override def field[A, B : Manifest](a: Exp[A], n: String): Exp[B] = toAtom(Field(a, n))
+
+}
+
+trait JSGenCaseClasses extends JSGenBase {
+  val IR: CaseClassesExp
+  import IR._
+  
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case _ => super.emitNode(sym, rhs)
+  }
+
+}
+
+trait ScalaGenCaseClasses extends ScalaGenBase {
+  val IR: CaseClassesExp
+  import IR.__
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case _ => super.emitNode(sym, rhs)
+  }
+
+}*/
+
+// TODO Do something with macros, or unify with JSProxy
+trait Fields extends Base { fields =>
+
+  class Fields[A] {
+    def field[B](name: String)(implicit target: Rep[A]): Rep[B] = fields.field(target, name)
+  }
+  
+  def field[A, B : Manifest](target: Rep[A], name: String): Rep[B]
+}
+
+trait FieldsExp extends Fields with BaseExp {
+  case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
+  override def field[A, B : Manifest](target: Rep[A], name: String): Rep[B] = toAtom(Field(target, name)) // FIXME Why do I need to write toAtom explicitly?
 }
 
 trait JSGenFields extends JSGenBase {
@@ -66,6 +84,10 @@ trait ScalaGenFields extends ScalaGenBase {
     case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
+}
+
+trait FieldsInScala extends Fields with JSInScala {
+  def field[A, B : Manifest](target: A, name: String): B = target.getClass.getMethod(name).invoke(target).asInstanceOf[B]
 }
 
 
