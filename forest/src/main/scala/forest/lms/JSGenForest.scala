@@ -8,7 +8,7 @@ import java.io.PrintWriter
  * JavaScript code generator for `ForestExp` expressions
  */
 // TODO I should not extend JSGen but a more general trait
-trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => // FIXME Why can’t I depend on JSGenListOps2 instead of mixing it?
+trait JSGenForest extends JSGen with JSGenListOps2 {
   val IR: ForestExp with JSExp with ListOps2Exp
   import IR._
 
@@ -36,7 +36,6 @@ trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => //
         }
         // Otherwise loop on children and append them one by one
         case children => {
-          // TODO I’d like to reuse code from JSArrays
           val x = fresh[Int]
           stream.println("for (var %s = 0 ; %s < %s.length ; %s++) {".format(quote(x), quote(x), quote(children), quote(x)))
           stream.println("%s.appendChild(%s[%s]);".format(quote(sym), quote(children), quote(x)))
@@ -80,6 +79,6 @@ trait JSGenForest extends JSGen with JSGenListOps2 { //this: JSGenListOps2 => //
   }
 }
 
-trait JSGenForestPkg extends JSGenForest with JSGenFields with JSGenProxy with JSGenModules {
+trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules {
   val IR: ForestPkgExp
 }

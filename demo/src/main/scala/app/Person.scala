@@ -17,3 +17,15 @@ object Person {
        |</html>""".stripMargin.format(views.Form.person(p))
 
 }
+
+
+import scala.virtualization.lms.common.Base
+import forest.lms._
+import js._
+
+trait PersonOps extends Base with Fields {
+  class PersonOps(implicit person: Rep[Person]) extends Fields[Person] {
+    def children = field[List[String]]("children")
+  }
+  implicit def repPersonToOps(p: Rep[Person]) = new PersonOps()(p)
+}

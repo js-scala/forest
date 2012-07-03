@@ -55,6 +55,6 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
   }
 }
 
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFields with ScalaGenProxy with ScalaGenModules {
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenProxy with ScalaGenModules {
   val IR: ForestPkgExp
 }
