@@ -53,8 +53,12 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
         emitValDef(sym, quote(root))
       } else {
         // Otherwise return a literal object containing all references.
-        // TODO if there is no reference on the root node, create one with name “root” (and update the TreeRoot code generation below)
-        emitNode(sym, JSLiteralDef(tree.refs.toList)) // FIXME Is it the right way to reuse JSLiteral code generator?
+        val refs = root match {
+          case Def(Tag(_, _, _, ref)) if ref.isEmpty => tree.refs + ("root" -> root)
+          case Def(Reflect(Tag(_, _, _, ref), _, _)) if ref.isEmpty => tree.refs + ("root" -> root)
+          case _ => tree.refs
+        }
+        emitNode(sym, JSLiteralDef(refs.toList)) // FIXME Is it the right way to reuse JSLiteral code generator?
       }
     }
 
@@ -65,7 +69,7 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
           case Def(Reflect(Tag(_, _, _, ref), _, _)) => ref
           case _ => None
         }
-        ref.map("." + _).getOrElse("")
+        ref.map("." + _).getOrElse(if (tree.refs.isEmpty) "" else ".root")
       }
       val rootField = tree match {
         case Def(tree: Tree) => root(tree)
