@@ -45,8 +45,8 @@ trait Forest extends Base {
  */
 trait ForestExp extends Forest with BaseExp { this: EffectExp with ListOps2Exp =>
 
-  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = Tag(name, children, attrs, ref)
-  override def text(content: List[Exp[Any]]) = Text(content)
+  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = reflectEffect(Tag(name, children, attrs, ref))
+  override def text(content: List[Exp[Any]]) = reflectEffect(Text(content))
 
   override def tree(root: Exp[Node]) = Tree(root)
 
