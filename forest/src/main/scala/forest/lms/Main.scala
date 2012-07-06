@@ -74,7 +74,7 @@ object Main extends App {
 
   // The JavaScript code generation
   val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
-  jsCodegen.emitSource0(() => JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
+  jsCodegen.emitModule(JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
 
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
   scalaCodegen.emitSource(main _, "tmpl", new java.io.PrintWriter(System.out))*/
