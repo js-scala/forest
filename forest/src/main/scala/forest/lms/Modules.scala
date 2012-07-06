@@ -6,7 +6,7 @@ import js._
 trait Modules { self: Base with JSProxyBase =>
 
   /** A Module is a singleton implementing a given type A */
-  abstract class Module[A]
+  sealed abstract class Module[A]
 
   /**
    * Returns the module of a given trait (which must not be abstract).
@@ -96,16 +96,11 @@ trait JSGenModules extends JSGenBase {
 
     case ModuleDef(methods) => {
       stream.println("var " + quote(sym) + " = {")
-      for ((method, i) <- methods.zipWithIndex) {
-        val params = method.params.map( p => quote(p._1) ).mkString(",")
-        stream.println("'%s': function (%s) {".format(method.name, params))
-        emitBlock(method.body)
-        stream.println("return %s;".format(quote(getBlockResult(method.body))))
-        if (i < methods.length - 1)
-          stream.println("},")
-        else
-          stream.println("}")
-      }
+      stream.println(
+        (for (method <- methods) yield {
+          "'" + method.name + "': " + quoteMethod(method)
+        }).mkString(",\n")
+      )
       stream.println("};")
     }
 
@@ -117,6 +112,32 @@ trait JSGenModules extends JSGenBase {
     case s @ Self() => quote(s.self)
     case Get(module) => quote(module)
     case _ => super.quote(x)
+  }
+
+  def emitModule[A : Manifest](module: Exp[Module[A]], name: String, stream: PrintWriter) = module match {
+    case Def(ModuleDef(methods)) => {
+      stream.println("window." + name + " = (function (module) {")
+      for (method <- methods) {
+        stream.println("module['" + method.name + "'] = " + quoteMethod(method) + ";")
+      }
+      stream.println("return module")
+      stream.println("})(window." + name + " || {});")
+      stream.flush()
+    }
+    case _ => sys.error(s"What kind of module are you? ($module)")
+  }
+
+  // That’s not pretty. But more reusable.
+  def quoteMethod(method: MethodDef): String = {
+    val builder = new StringBuilder
+    val params = method.params.map( p => quote(p._1) ).mkString(",")
+    builder ++= "function (%s) {\n".format(params)
+    val bodyWriter = new java.io.StringWriter()
+    emitBlock(method.body)(new PrintWriter(bodyWriter))
+    builder ++= bodyWriter.toString()
+    builder ++= "return %s\n".format(quote(getBlockResult(method.body)))
+    builder ++= "}"
+    builder.result()
   }
 
 }
@@ -131,7 +152,6 @@ trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
 
   override protected implicit def moduleToA[A <: AnyRef : Manifest](m: Module[A]): A = m match {
     case ModuleW(a) => a
-    case _ => sys.error("That’s bad.")
   }
 
 }
