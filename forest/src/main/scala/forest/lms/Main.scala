@@ -101,7 +101,7 @@ object Main extends App {
               (function () {
                 var addBtn = document.getElementById('add-article');
                 addBtn.onclick = function () {
-                  var articleTree = Articles().show({
+                  var articleTree = Articles.show({
                     name: 'Item',
                     price: 123.45,
                     highlighted: false
@@ -112,7 +112,7 @@ object Main extends App {
                 };
                 var freshBtn = document.getElementById('fresh-list');
                 freshBtn.onclick = function () {
-                  var tree = Articles().list([{
+                  var tree = Articles.list([{
                     name: 'Item 1',
                     price: 12.34,
                     highlighted: true
@@ -133,6 +133,6 @@ object Main extends App {
 
   }
 
-  ScalaProg.main(List(Article("Something", 42.0, false), Article("Foobar", 0, true)))
+  ScalaProg.main(List(Article("Something", 42.0, false), Article("Foobar<b>baz</b>", 0, true)))
 
 }

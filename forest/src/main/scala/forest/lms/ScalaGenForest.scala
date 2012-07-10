@@ -36,7 +36,7 @@ trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps2 { // this: Sca
       }
     }
 
-    case Text(content) => emitValDef(sym, content.map(quote).mkString(" + "))
+    case Text(content) => emitValDef(sym, "(" + content.map(quote).mkString(" + ") + ").replace(\"<\", \"&lt;\")")
 
     case Tree(root) => emitValDef(sym, quote(root))
 
