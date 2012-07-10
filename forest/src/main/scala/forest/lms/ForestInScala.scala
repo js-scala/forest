@@ -22,7 +22,7 @@ trait ForestInScala extends Forest with JSInScala {
     }
   }
 
-  def text(xs: List[Any]): String = xs.mkString
+  def text(xs: List[Any]): String = xs.mkString.replace("<", "&lt;")
 
   def tree(root: String): String = root
 
