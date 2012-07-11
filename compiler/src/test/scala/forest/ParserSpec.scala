@@ -55,6 +55,10 @@ class ParserSpec extends Specification {
         parser.parse(parser.parameters, "{article: Article}").get must equalTo (List("article"->"Article"))
       }
       
+      "complex parameters types" >> {
+        parser.parse(parser.parameters, "{article: Article[Foo[Bar]]}").get must equalTo (List("article"->"Article[Foo[Bar]]"))
+      }
+      
       "node references" >> {
         parser.parse(parser.tree(0), "div /ref").get must equalTo (Tag("div", List.empty, Map.empty, Some("ref")))
       }
