@@ -13,10 +13,18 @@ scalaHome <<= baseDirectory { dir =>
   else Some(file(x))
 }
 
-scalaVersion := "2.10.0-virtualized-SNAPSHOT"
+// scalaVersion := "2.10.0-virtualized-SNAPSHOT"
+
+scalaVersion := "2.10.0-M2-0020-geab3b7e4d7-2012-07-09"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 
-resolvers += ScalaToolsSnapshots
+resolvers ++= Seq(
+  ScalaToolsSnapshots,
+  "Dropbox" at "http://dl.dropbox.com/u/12870350/scala-virtualized"
+)
 
-libraryDependencies += "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1-SNAPSHOT"
+libraryDependencies ++= Seq(
+  "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1-SNAPSHOT",
+  "org.scalatest" % "scalatest_2.10.0-virtualized-SNAPSHOT" % "1.6.1-SNAPSHOT" % "test"
+)

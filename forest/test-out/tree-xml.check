@@ -1,0 +1,17 @@
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class Tree extends ((java.lang.String)=>(xml.Node)) {
+def apply(x0:java.lang.String): xml.Node = {
+val x1 = {xml.Text("Content: " + x0)}
+val x2 = List(x1)
+val x3 = <div class={"message"}>{x2}</div>
+val x4 = x3
+x4
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+compilation: ok
+<div class="message">Content: Bonjour</div>
