@@ -4,12 +4,15 @@ import java.io.{PrintStream,File,FileInputStream,FileOutputStream,ByteArrayOutpu
 import org.scalatest._
 
 
-trait FileDiffSuite extends Suite {
+class FileDiffSuite(prefix: String) { this: Suite =>
   
-  def prefix: String
+  def testWithOutFile(name: String)(test: => Unit) {
+    withOutFile(prefix+name)(test)
+    assertFileEqualsCheck(prefix+name)
+  }
   
   def withOutFile(name: String)(func: => Unit): Unit = {
-    val file = new File(prefix+name)
+    val file = new File(name)
     file.getParentFile.mkdirs()
     withOutput(new PrintStream(new FileOutputStream(file)))(func)
   }
@@ -41,7 +44,7 @@ trait FileDiffSuite extends Suite {
     new String(buf)
   }
   def assertFileEqualsCheck(name: String): Unit = {
-    expect(readFile(prefix+name+".check")){readFile(prefix+name)}
-    new File(prefix+name) delete ()
+    expect(readFile(name+".check")){readFile(name)}
+    new File(name) delete ()
   }
 }
