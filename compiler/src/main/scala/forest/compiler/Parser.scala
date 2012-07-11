@@ -104,8 +104,25 @@ class Parser extends JavaTokenParsers {
     )
   }
   
+  def any = Parser(in =>
+    if (in.atEnd) {
+      Failure("end of file", in)
+    } else {
+      Success(in.first, in.rest)
+    })
+  
+  def brackets: Parser[String] = "[" ~ (rep((brackets | not("]") ~> any))) ~ commit("]") ^^ {
+    case p1 ~ charList ~ p2 => p1 + charList.mkString + p2
+  }
+  
+  val typeIdent: Parser[String] = ident ~ (brackets?) ^^ { case i ~ b => b match {
+      case Some(b) => i + b
+      case None => i
+    }
+  }
+  
   val parameter: Parser[(String, String)] =
-    (ident ~ (": " ~> ident)) ^^ { case name ~ kind => (name -> kind) }
+    (ident ~ (": " ~> typeIdent)) ^^ { case name ~ kind => (name -> kind) }
   
   // Template parameters
   val parameters: Parser[List[(String, String)]] =
