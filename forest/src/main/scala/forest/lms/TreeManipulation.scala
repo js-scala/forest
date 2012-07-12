@@ -25,12 +25,13 @@ trait TreeManipulation extends Forest {
    */
   def infix_append(target: Rep[NodeSelection], node: Rep[Node]): Rep[Unit]
 
-  implicit def nodeRefManifest[T <: NodeRef]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
-  implicit def nodeSelectionManifest[T <: NodeSelection]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
-  implicit def transformableNodeManifest[T <: TransformableNode]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
 }
 
 trait TreeManipulationExp extends TreeManipulation with EffectExp { this: ForestExp =>
+
+  override type TransformableNode = scala.xml.NodeSeq
+  override type NodeSelection = scala.xml.NodeSeq
+  override type NodeRef = forest.lib.NodeRef
 
   case class NodeRefTransform(root: Exp[NodeRef], o: Sym[org.fusesource.scalate.scuery.Transformer], n: Sym[TransformableNode], body: Exp[Unit]) extends Def[Unit]
   case class TransformableFind(root: Rep[TransformableNode], selector: Rep[String]) extends Def[NodeSelection]
@@ -119,13 +120,6 @@ trait ScalaGenTreeManipulation extends ScalaGenEffect {
 
     case _ => super.emitNode(sym, node)
 
-  }
-
-  override def remap[A](m: Manifest[A]): String = {
-    if (m == manifest[NodeRef]) "forest.lib.NodeRef"
-    else if (m == manifest[NodeSelection]) "xml.Node"
-    else if (m == manifest[TransformableNode]) "xml.Node"
-    else super.remap(m)
   }
 
 }
