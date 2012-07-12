@@ -1,0 +1,35 @@
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class Update extends ((forest.lib.NodeRef)=>(Unit)) {
+def apply(x0:forest.lib.NodeRef): Unit = {
+val x1 = new org.fusesource.scalate.scuery.Transformer {
+val x2 = x0.cell
+val x3 = $("div")
+val x4 = {xml.Text("foo")}
+val x5 = List(x4)
+val x6 = <span>{x5}</span>
+val x7 = x6
+val x8 = x7
+val x9 = x3(_ match { case e:xml.Elem => e.copy(child=e.child++x8)})
+}
+val x11 = x0.cell = x1(x0.cell)
+()
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+function update(x13) {
+var x15 = x13
+var x16 = $(x15).find("div")
+var x17 = document.createTextNode("foo");
+var x18 = [x17];
+var x19 = document.createElement('span');
+x19.appendChild(x17);
+var x20 = x19
+var x21 = x20
+var x22 = x16.append(x21)
+var x24 = x22
+return undefined
+}
