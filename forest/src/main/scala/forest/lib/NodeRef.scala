@@ -1,3 +1,3 @@
 package forest.lib
 
-class NodeRef(var cell: xml.Node)
+class NodeRef(var cell: xml.NodeSeq)
