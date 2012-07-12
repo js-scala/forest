@@ -2,20 +2,9 @@ name := "forest"
 
 organization := "forest"
 
-version := "0.1-SNAPSHOT"
+version := "0.2-SNAPSHOT"
 
-scalaHome <<= baseDirectory { dir =>
-  val props = new java.util.Properties()
-  IO.load(props, dir / "local.properties")
-  val x = props.getProperty("scala.virtualized.home")
-  if (x == null)
-    sys.error("Please set a scala.virtualized.home property in local.properties file")
-  else Some(file(x))
-}
-
-// scalaVersion := "2.10.0-virtualized-SNAPSHOT"
-
-scalaVersion := "2.10.0-M2-0020-geab3b7e4d7-2012-07-09"
+scalaVersion := Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.10.0-M1-virtualized")
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 
@@ -25,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1-SNAPSHOT",
+  "EPFL" %% "js-scala" % "0.2-SNAPSHOT",
   "scalate" %% "scuery" % "4.0.0-SNAPSHOT",
   "org.scalatest" % "scalatest_2.10.0-virtualized-SNAPSHOT" % "1.6.1-SNAPSHOT" % "test"
 )

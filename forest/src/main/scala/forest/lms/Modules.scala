@@ -31,7 +31,7 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
 
   /** Module definition */
   case class ModuleDef[A : Manifest](methods: List[MethodDef]) extends Def[Module[A]]
-  case class MethodDef(name: String, params: List[(Sym[Any], String)], body: Exp[Any])
+  case class MethodDef(name: String, params: List[(Sym[Any], String)], body: Block[Any])
   case class Self[A : Manifest]() extends Exp[A] {
     private var _self: Exp[Module[A]] = _
     def self = {
@@ -88,11 +88,11 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
 import js._
 import java.io.PrintWriter
 
-trait JSGenModules extends JSGenBase {
+trait JSGenModules extends JSGenEffect {
   val IR: ModulesExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
 
     case ModuleDef(methods) => {
       stream.println("var " + quote(sym) + " = {")
@@ -133,7 +133,9 @@ trait JSGenModules extends JSGenBase {
     val params = method.params.map( p => quote(p._1) ).mkString(",")
     builder ++= "function (%s) {\n".format(params)
     val bodyWriter = new java.io.StringWriter()
-    emitBlock(method.body)(new PrintWriter(bodyWriter))
+    withStream(new java.io.PrintWriter(bodyWriter)) {
+      emitBlock(method.body)
+    }
     builder ++= bodyWriter.toString()
     builder ++= "return %s\n".format(quote(getBlockResult(method.body)))
     builder ++= "}"
@@ -156,11 +158,11 @@ trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
 
 }
 
-trait ScalaGenModules extends ScalaGenBase {
+trait ScalaGenModules extends ScalaGenEffect {
   val IR: ModulesExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
 
     case ModuleDef(methods) => {
       stream.println("object " + quote(sym) + " {")

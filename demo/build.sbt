@@ -1,24 +1,16 @@
 
 name := "demo"
 
-scalaHome <<= baseDirectory { dir =>
-  val props = new java.util.Properties
-  IO.load(props, dir / "local.properties")
-  val x = props.getProperty("scala.virtualized.home")
-  if (x == null) sys.error("Please set a scala.virtualized.home property in local.property file")
-  else Some(file(x))
-}
-
-scalaVersion := "2.10.0-virtualized-SNAPSHOT"
+scalaVersion := Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.10.0-M1-virtualized")
 
 resolvers += ScalaToolsSnapshots
 
-libraryDependencies += "forest" %% "forest" % "0.1-SNAPSHOT"
+libraryDependencies += "forest" %% "forest" % "0.2-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 
 sourceGenerators in Compile <+= (sourceDirectory in Compile, sourceManaged in Compile) map { (sourceDir, targetDir) =>
-  forest.compiler.Compiler.compile(sourceDir / "forest" / "views" / "Form", targetDir, Seq("app._"), Seq("PersonOps"))
+  forest.compiler.Compiler.compile(scalax.file.Path(sourceDir / "forest" / "views" / "Form"), scalax.file.Path(targetDir), Seq("app._"), Seq("PersonOps"))
   (targetDir ** "*.scala").get.map(_.getAbsoluteFile)
 }
 

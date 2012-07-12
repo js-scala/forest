@@ -12,7 +12,7 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
   val IR: ForestExp with JSExp with ListOps2Exp
   import IR._
 
-  override def emitNode(sym: Sym[Any], node: Def[Any])(implicit stream: PrintWriter): Unit = node match {
+  override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
     case Tag(name, children, attrs, ref) => {
       // Create the element

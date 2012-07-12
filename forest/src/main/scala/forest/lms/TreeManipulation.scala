@@ -33,7 +33,7 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp { this: Forest
   override type NodeSelection = scala.xml.NodeSeq
   override type NodeRef = forest.lib.NodeRef
 
-  case class NodeRefTransform(root: Exp[NodeRef], o: Sym[org.fusesource.scalate.scuery.Transformer], n: Sym[TransformableNode], body: Exp[Unit]) extends Def[Unit]
+  case class NodeRefTransform(root: Exp[NodeRef], o: Sym[org.fusesource.scalate.scuery.Transformer], n: Sym[TransformableNode], body: Block[Unit]) extends Def[Unit]
   case class TransformableFind(root: Rep[TransformableNode], selector: Rep[String]) extends Def[NodeSelection]
   case class SelectionAppend(target: Rep[NodeSelection], node: Rep[Node]) extends Def[Unit]
 
@@ -73,7 +73,7 @@ trait JSGenTreeManipulation extends JSGenEffect {
   val IR: TreeManipulationExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], node: Def[Any])(implicit stream: PrintWriter): Unit = node match {
+  override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
     case NodeRefTransform(root, o, n, body) => {
       stream.println("var " + quote(n) + " = " + quote(root))
@@ -100,7 +100,7 @@ trait ScalaGenTreeManipulation extends ScalaGenEffect {
   val IR: TreeManipulationExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], node: Def[Any])(implicit stream: PrintWriter): Unit = node match {
+  override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
     case NodeRefTransform(root, o, n, body) => {
       stream.println("val " + quote(o) + " = new org.fusesource.scalate.scuery.Transformer {")

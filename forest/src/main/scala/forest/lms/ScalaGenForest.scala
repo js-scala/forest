@@ -12,7 +12,7 @@ trait ScalaGenForest extends ScalaGenEffect {
   val IR: ForestExp with ListOps2Exp
   import IR._
 
-  override def emitNode(sym: Sym[Any], node: Def[Any])(implicit stream: PrintWriter): Unit = node match {
+  override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
     case Tag(name, children, attrs, _) => {
       val attrsFormatted = (for ((name, value) <- attrs) yield {
@@ -59,7 +59,7 @@ trait ScalaGenForestXml extends ScalaGenEffect {
   val IR: ForestExp with ListOps2Exp
   import IR._
 
-  override def emitNode(sym: Sym[Any], node: Def[Any])(implicit stream: PrintWriter): Unit = node match {
+  override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
     case Tag(name, children, attrs, _) => {
       val attrsFormatted = (for ((name, value) <- attrs) yield {
         // value is a list of string literals or symbols

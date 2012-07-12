@@ -33,7 +33,7 @@ trait JSGenCaseClasses extends JSGenBase {
   val IR: CaseClassesExp
   import IR._
   
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
@@ -44,7 +44,7 @@ trait ScalaGenCaseClasses extends ScalaGenBase {
   val IR: CaseClassesExp
   import IR.__
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
@@ -70,7 +70,7 @@ trait JSGenFields extends JSGenBase {
   val IR: FieldsExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
@@ -80,7 +80,7 @@ trait ScalaGenFields extends ScalaGenBase {
   val IR: FieldsExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
@@ -132,8 +132,8 @@ trait ListOps2Exp extends ListOps2 with EffectExp {
   def list_mkString[A : Manifest](xs: Exp[List[A]]) = ListMkString(xs)
 
   case class ConstList[A : Manifest](xs: Seq[Rep[A]]) extends Def[List[A]]
-  case class ListFlatMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Exp[List[B]]) extends Def[List[B]]
-  case class ListMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Exp[B]) extends Def[List[B]]
+  case class ListFlatMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Block[List[B]]) extends Def[List[B]]
+  case class ListMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Block[B]) extends Def[List[B]]
   case class ListConcat[A : Manifest](l1: Exp[List[A]], l2: Exp[List[A]]) extends Def[List[A]]
   case class ListMkString[A : Manifest](l: Exp[List[A]]) extends Def[String]
 
@@ -167,11 +167,11 @@ trait ListOps2Opt extends ListOps2Exp {
   }
 }
 
-trait ScalaGenListOps2 extends ScalaGenBase {
+trait ScalaGenListOps2 extends ScalaGenEffect {
   val IR: ListOps2Exp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case ConstList(xs) => {
       emitValDef(sym, "List(" + xs.map(quote).mkString(", ") + ")")
     }
@@ -192,11 +192,11 @@ trait ScalaGenListOps2 extends ScalaGenBase {
   }
 }
 
-trait JSGenListOps2 extends JSGenBase {
+trait JSGenListOps2 extends JSGenEffect {
   val IR: ListOps2Exp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case ConstList(values) => {
       emitValDef(sym, values.map(quote).mkString("[", ",", "]") + ";")
     }
@@ -244,7 +244,7 @@ trait ScalaGenProxy extends ScalaGenBase with ScalaGenEffect {
   val IR: JSProxyExp
   import IR._
 
-  override def emitNode(sym: Sym[Any], rhs: Def[Any])(implicit stream: PrintWriter) = rhs match {
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
 
   case MethodCall(receiver, method, args) =>
     emitValDef(sym, quote(receiver) + "." + method + args.map(quote).mkString("(", ", ", ")"))
