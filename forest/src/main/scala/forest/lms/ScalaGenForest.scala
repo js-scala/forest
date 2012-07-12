@@ -107,10 +107,10 @@ trait ScalaGenForestXml extends ScalaGenEffect {
 
 }
 
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
   val IR: ForestPkgExp
 }
 
-trait ScalaGenForestXmlPkg extends ScalaGenForestXml with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
+trait ScalaGenForestXmlPkg extends ScalaGenForestXml with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
   val IR: ForestPkgExp
 }

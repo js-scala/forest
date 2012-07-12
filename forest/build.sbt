@@ -26,6 +26,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "EPFL" % "lms-sandbox_2.10.0-virtualized-SNAPSHOT" % "0.1-SNAPSHOT",
+  "scalate" %% "scuery" % "4.0.0-SNAPSHOT",
   "org.scalatest" % "scalatest_2.10.0-virtualized-SNAPSHOT" % "1.6.1-SNAPSHOT" % "test"
 )
 
