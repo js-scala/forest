@@ -17,7 +17,8 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
       override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
       codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
-      println(compile(self.message).asInstanceOf[String => String]("Bonjour"))
+      val messageCompiled = compile(self.message)
+      println(messageCompiled("Bonjour"))
     }
   }
 
@@ -26,7 +27,8 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
       override val codegen = new ScalaGenForestXmlPkg { val IR: self.type = self }
       codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
-      println(compile(self.message).asInstanceOf[String => xml.Node]("Bonjour"))
+      val messageCompiled = compile(self.message)
+      println(messageCompiled("Bonjour"))
     }
   }
 
