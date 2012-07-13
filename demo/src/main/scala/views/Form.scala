@@ -5,7 +5,7 @@ import forest.lms._
 
 object Form {
 
-  object Ir extends ir.Form with ForestPkgExp with ScalaCompile with FieldsExp {
+  object Ir extends ir.Form with ForestStringPkgExp with ScalaCompile with FieldsExp {
 
     override val codegen = new ScalaGenForestPkg with ScalaGenFields { val IR: Ir.type = Ir }
 
