@@ -1,8 +1,8 @@
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class Tree extends ((java.lang.String)=>(String)) {
-def apply(x0:java.lang.String): String = {
+class Tree extends ((java.lang.String)=>(java.lang.String)) {
+def apply(x0:java.lang.String): java.lang.String = {
 val x1 = ("Content: " + x0).replace("<", "&lt;")
 val x2 = List(x1)
 val x3 = "<div" + " class=\"" + "message" + "\"" + ">" + x2.mkString + "</div>"

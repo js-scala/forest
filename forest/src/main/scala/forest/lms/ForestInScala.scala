@@ -11,6 +11,9 @@ trait ForestInScala extends Forest with JSInScala {
   override type Node = String
   override type Tree = String
 
+  override def nodeManifest = manifest[Node]
+  override def treeManifest = manifest[Tree]
+
   def tag(name: String, children: List[String], attrs: Map[String, List[Any]], ref: Option[String]): String = {
     val formattedAttrs = attrs.foldLeft(""){
       case (attrs, (name, value)) => attrs ++ " %s=\"%s\"".format(name, value.mkString)

@@ -44,8 +44,7 @@ trait Articles extends ForestPkg with ArticleOps {
           tag("dt", List(text("Price")), Map.empty, None),
           tag("dd", List(text(article.price, " Euros")), Map.empty, None)
       )
-      //tree(tag("dl", name ++ price, Map("class"->(if(article.highlighted) List("highlighted") else List(""))), None))
-      tree(tag("dl", name ++ price, Map("class"->SList("article")), Some("root")))
+      tree(tag("dl", name ++ price, Map[String, List[Rep[Any]]]("class"->(SList(if(article.highlighted) "highlighted" else ""))), None))
     }
 
     /**
@@ -70,7 +69,7 @@ trait Articles extends ForestPkg with ArticleOps {
 
 object Main extends App {
 
-  object JSProg extends Articles with ForestPkgExp with FieldsExp
+  object JSProg extends Articles with ForestStringPkgExp with FieldsExp
 
   // The JavaScript code generation
   val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }

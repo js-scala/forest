@@ -25,6 +25,9 @@ trait TreeManipulation extends Forest {
    */
   def infix_append(target: Rep[NodeSelection], node: Rep[Node]): Rep[Unit]
 
+  implicit def nodeRefManifest: Manifest[NodeRef]
+  // implicit def nodeSelectionManifest: Manifest[NodeSelection]
+  implicit def transformableNodeManifest: Manifest[TransformableNode]
 }
 
 trait TreeManipulationExp extends TreeManipulation with EffectExp { this: ForestExp =>
@@ -32,6 +35,9 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp { this: Forest
   override type TransformableNode = scala.xml.NodeSeq
   override type NodeSelection = scala.xml.NodeSeq
   override type NodeRef = forest.lib.NodeRef
+
+  override def nodeRefManifest = manifest[NodeRef]
+  override def transformableNodeManifest = manifest[TransformableNode]
 
   case class NodeRefTransform(root: Exp[NodeRef], o: Sym[org.fusesource.scalate.scuery.Transformer], n: Sym[TransformableNode], body: Block[Unit]) extends Def[Unit]
   case class TransformableFind(root: Rep[TransformableNode], selector: Rep[String]) extends Def[NodeSelection]

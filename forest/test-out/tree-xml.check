@@ -1,8 +1,8 @@
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class Tree extends ((java.lang.String)=>(xml.Node)) {
-def apply(x0:java.lang.String): xml.Node = {
+class Tree extends ((java.lang.String)=>(scala.xml.Node)) {
+def apply(x0:java.lang.String): scala.xml.Node = {
 val x1 = {xml.Text("Content: " + x0)}
 val x2 = List(x1)
 val x3 = <div class={"message"}>{x2}</div>

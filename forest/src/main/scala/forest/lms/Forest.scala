@@ -35,29 +35,31 @@ trait Forest extends Base {
   def tree(root: Rep[Node]): Rep[Tree]
   implicit def treeToNode(tree: Rep[Tree]): Rep[Node]
 
-  // HACK : Sometimes I need to provide a Manifest for nodes or tree
-  implicit def nodeManifest[T <: Node]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
-  implicit def treeManifest[T <: Tree]: Manifest[T] = manifest[AnyRef].asInstanceOf[Manifest[T]]
+  implicit def nodeManifest: Manifest[Node]
+  implicit def treeManifest: Manifest[Tree]
 }
 
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with BaseExp { this: EffectExp with ListOps2Exp =>
+trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
 
-  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = reflectEffect(Tag(name, children, attrs, ref))
+  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) =
+    reflectEffect(Tag(name, children, attrs, ref))
+
   override def text(content: List[Exp[Any]]) = reflectEffect(Text(content))
 
-  override def tree(root: Exp[Node]) = Tree(root)
+  override def tree(root: Exp[Node]) = ForestTree(root)
 
-  def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
+  override def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
 
   case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
 
+  // TODO two version of Tag, one with children: Exp[List[Node]] and the other with children: List[Exp[Node]]
   case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
   case class Text(content: List[Exp[Any]]) extends Def[Node]
 
-  case class Tree(root: Exp[Node]) extends Def[Tree] {
+  case class ForestTree(root: Exp[Node]) extends Def[Tree] {
     lazy val refs: Map[String, Exp[Node]] = {
       def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = {
         def collectRefs2(ref: Option[String], childrenExp: Exp[List[Node]]): Map[String, Exp[Node]] = {
@@ -91,8 +93,31 @@ trait ForestExp extends Forest with BaseExp { this: EffectExp with ListOps2Exp =
 
 }
 
+/**
+ * Represents HTML with scala XML standard library
+ */
+trait ForestXmlExp extends ForestExp { this: ListOps2Exp =>
+  override type Node = scala.xml.Node
+  override type Tree = scala.xml.Node
+
+  override def nodeManifest = manifest[Node]
+  override def treeManifest = manifest[Tree]
+}
+
+/**
+ * Represents HTML with text
+ */
+trait ForestStringExp extends ForestExp { this: ListOps2Exp =>
+  override type Node = String
+  override type Tree = String
+
+  override def nodeManifest = manifest[Node]
+  override def treeManifest = manifest[Tree]
+}
 
 // --- Convenient packages
 
 trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
 trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
+trait ForestStringPkgExp extends ForestPkgExp with ForestStringExp
+trait ForestXmlPkgExp extends ForestPkgExp with ForestXmlExp

@@ -9,7 +9,7 @@ import java.io.PrintWriter
  */
 // TODO I should extend a more general trait than ScalaGenEffect
 trait ScalaGenForest extends ScalaGenEffect {
-  val IR: ForestExp with ListOps2Exp
+  val IR: ForestStringExp with ListOps2Exp
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
@@ -38,25 +38,17 @@ trait ScalaGenForest extends ScalaGenEffect {
 
     case Text(content) => emitValDef(sym, "(" + content.map(quote).mkString(" + ") + ").replace(\"<\", \"&lt;\")")
 
-    case Tree(root) => emitValDef(sym, quote(root))
+    case ForestTree(root) => emitValDef(sym, quote(root))
 
     case TreeRoot(tree) => emitValDef(sym, quote(tree))
 
     case _ => super.emitNode(sym, node)
   }
 
-  // On Scala backend, trees are just strings
-  override def remap[A](m: Manifest[A]) = {
-    if (m == manifest[Tree]) {
-      "String"
-    } else {
-      super.remap(m)
-    }
-  }
 }
 
 trait ScalaGenForestXml extends ScalaGenEffect {
-  val IR: ForestExp with ListOps2Exp
+  val IR: ForestXmlExp with ListOps2Exp
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
@@ -85,7 +77,7 @@ trait ScalaGenForestXml extends ScalaGenEffect {
       emitValDef(sym, "{xml.Text(%s)}".format(content.map(quote).mkString(" + ")))
     }
 
-    case Tree(root) => {
+    case ForestTree(root) => {
       emitValDef(sym, quote(root))
     }
 
@@ -97,20 +89,12 @@ trait ScalaGenForestXml extends ScalaGenEffect {
 
   }
 
-  override def remap[A](m: Manifest[A]) = {
-    if (m == manifest[Tree]) {
-      "xml.Node"
-    } else {
-      super.remap(m)
-    }
-  }
-
 }
 
 trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
-  val IR: ForestPkgExp
+  val IR: ForestStringPkgExp
 }
 
 trait ScalaGenForestXmlPkg extends ScalaGenForestXml with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 {
-  val IR: ForestPkgExp
+  val IR: ForestXmlPkgExp
 }

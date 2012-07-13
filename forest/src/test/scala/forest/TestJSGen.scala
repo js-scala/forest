@@ -23,7 +23,7 @@ class TestJSGen extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testJsGen = testWithOutFile("tree-js") {
-    val prog = new Message with ForestPkgExp { self =>
+    val prog = new Message with ForestStringPkgExp { self =>
       val codegen = new JSGenForestPkg { val IR: self.type = self }
       codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
     }

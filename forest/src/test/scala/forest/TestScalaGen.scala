@@ -13,7 +13,7 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testStringGen = testWithOutFile("tree") {
-    val prog = new Message with ForestPkgExp with CompileScala { self =>
+    val prog = new Message with ForestStringPkgExp with CompileScala { self =>
       override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
       codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
@@ -22,7 +22,7 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testXmlGen = testWithOutFile("tree-xml") {
-    val prog = new Message with ForestPkgExp with CompileScala { self =>
+    val prog = new Message with ForestXmlPkgExp with CompileScala { self =>
       override val codegen = new ScalaGenForestXmlPkg { val IR: self.type = self }
       codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
