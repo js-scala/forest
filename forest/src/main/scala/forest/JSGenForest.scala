@@ -1,8 +1,8 @@
-package forest.lms
+package forest
 
-import virtualization.lms.common._
-import js._
-import java.io.PrintWriter
+import scala.js.JSExp
+import scala.js.JSGen
+import scala.js.JSGenProxy
 
 /**
  * JavaScript code generator for `ForestExp` expressions

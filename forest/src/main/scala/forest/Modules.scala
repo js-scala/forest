@@ -1,7 +1,16 @@
-package forest.lms
+package forest
 
-import virtualization.lms.common._
-import js._
+import java.io.PrintWriter
+import scala.Array.canBuildFrom
+import scala.Tuple2.apply
+import scala.js.JSProxyBase
+import scala.js.JSProxyExp
+import scala.js.JSProxyInScala
+import scala.js.JSGenEffect
+import scala.js.JSInScala
+import scala.virtualization.lms.common.Base
+import scala.virtualization.lms.common.EffectExp
+import scala.virtualization.lms.common.ScalaGenEffect
 
 trait Modules { self: Base with JSProxyBase =>
 
@@ -84,9 +93,6 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
   // Syntactic sugar on top of the JSProxy API
   def proxyTrait[T <: AnyRef](x: Rep[T], parentCtor: Option[Rep[Any]])(implicit outer: Base, m: Manifest[T]): T = proxyTrait(x, parentCtor, outer)
 }
-
-import js._
-import java.io.PrintWriter
 
 trait JSGenModules extends JSGenEffect {
   val IR: ModulesExp

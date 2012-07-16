@@ -1,9 +1,9 @@
-package forest.lms
+package forest
 
-import virtualization.lms.common._
-import virtualization.lms.internal._
-import js._
 import java.io.PrintWriter
+import scala.collection.immutable.{List => SList}
+import scala.js.JSGenProxy
+import scala.virtualization.lms.common.Base
 
 // --- Business class definition
 

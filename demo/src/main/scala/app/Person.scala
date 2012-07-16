@@ -20,7 +20,7 @@ object Person {
 
 
 import scala.virtualization.lms.common.Base
-import forest.lms._
+import forest._
 import js._
 
 trait PersonOps extends Base with Fields {

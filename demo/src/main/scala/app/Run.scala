@@ -1,7 +1,7 @@
 package app
 
 import java.io.PrintWriter
-import forest.lms._
+import forest._
 import js._
 
 object Run extends App {

@@ -1,7 +1,13 @@
-package forest.lms
+package forest
 
-import virtualization.lms.common._
-import js._
+import scala.Option.option2Iterable
+import scala.Tuple2.apply
+import scala.js.JS
+import scala.js.JSExp
+import scala.js.JSProxyBase
+import scala.js.JSProxyExp
+import scala.virtualization.lms.common.Base
+import scala.virtualization.lms.common.EffectExp
 
 /**
  * Forest DSL interface

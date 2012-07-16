@@ -1,6 +1,9 @@
-package forest.lms
+package forest
 
-import scala.virtualization.lms.common._
+import scala.Tuple2.apply
+import scala.js.JSGenEffect
+import scala.virtualization.lms.common.EffectExp
+import scala.virtualization.lms.common.ScalaGenEffect
 
 /**
  * DSL to manipulate trees.
@@ -70,9 +73,6 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp { this: Forest
   }
 
 }
-
-import scala.js._
-import java.io.PrintWriter
 
 trait JSGenTreeManipulation extends JSGenEffect {
 

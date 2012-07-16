@@ -1,11 +1,14 @@
-package forest.lms
+package forest
 
-// --- This file contains temporary workarounds or pieces of code which may (should?) disappear as soon as possible
-
-import virtualization.lms.common._
-import virtualization.lms.internal._
-import js._
-import java.io.PrintWriter
+import scala.js.JSGenBase
+import scala.js.JSGenEffect
+import scala.js.JSInScala
+import scala.js.JSProxyExp
+import scala.virtualization.lms.common.Base
+import scala.virtualization.lms.common.BaseExp
+import scala.virtualization.lms.common.EffectExp
+import scala.virtualization.lms.common.ScalaGenBase
+import scala.virtualization.lms.common.ScalaGenEffect
 
 // --- Case classes support
 

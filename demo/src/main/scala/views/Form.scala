@@ -1,7 +1,7 @@
 package views
 
 import scala.virtualization.lms.internal.ScalaCompile
-import forest.lms._
+import forest._
 
 object Form {
 

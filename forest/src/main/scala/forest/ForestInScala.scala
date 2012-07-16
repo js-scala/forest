@@ -1,7 +1,7 @@
-package forest.lms
+package forest
 
-import scala.virtualization.lms.common._
-import scala.js._
+import scala.js.JSInScala
+import scala.js.JSProxyInScala
 
 /**
  * Simple interpreter for Forest programs

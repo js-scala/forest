@@ -32,7 +32,7 @@ class Compiler {
     (outputDir / (sourceDir.simpleName + ".scala")).write(
         """|package ir // TODO remove that
            |
-           |import forest.lms._
+           |import forest._
            |%s
            |
            |trait %s extends ForestPkg %s{
@@ -45,10 +45,8 @@ class Compiler {
                sourceDir.simpleName,
                (for (mixin <- mixins) yield "with %s ".format(mixin)).mkString,
                sourceDir.simpleName,
-               (for (template <- templates; t <- template.right.toSeq) yield t).mkString,
-               sourceDir.simpleName,
-               sourceDir.simpleName
-               )
+               (for (template <- templates; t <- template.right.toSeq) yield t).mkString
+           )
     )
   }
 

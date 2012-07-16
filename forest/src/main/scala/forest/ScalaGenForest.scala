@@ -1,7 +1,7 @@
-package forest.lms
+package forest
 
-import virtualization.lms.common._
-import java.io.PrintWriter
+import scala.virtualization.lms.common.ScalaGenEffect
+import scala.virtualization.lms.common.ScalaGenFunctions
 
 
 /**
