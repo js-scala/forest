@@ -75,8 +75,12 @@ trait ScalaGenForestXml extends ScalaGenEffect {
           if (children.isEmpty) {
             emitValDef(sym, "<%s%s />".format(name, attrsFormatted))
           } else {
-            // TODO optimization when there is only one child (don’t create a list for that)
-            emitValDef(sym, "<%s%s>{%s}</%s>".format(name, attrsFormatted, children.map(quote), name))
+            children match {
+              case child :: Nil =>
+                emitValDef(sym, "<%s%s>{%s}</%s>".format(name, attrsFormatted, quote(child), name))
+              case _ =>
+                emitValDef(sym, "<%s%s>{%s}</%s>".format(name, attrsFormatted, children.map(quote), name))
+            }
           }
         }
         case Right(children) =>

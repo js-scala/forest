@@ -7,7 +7,6 @@ import java.io.PrintWriter
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-// TODO I should not extend JSGen but a more general trait
 trait JSGenForest extends JSGen with JSGenListOps2 {
   val IR: ForestExp with JSExp with ListOps2Exp
   import IR._

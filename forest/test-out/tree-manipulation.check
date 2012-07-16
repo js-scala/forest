@@ -7,7 +7,7 @@ val x1 = new org.fusesource.scalate.scuery.Transformer {
 val x2 = x0.cell
 val x3 = $("div")
 val x4 = {xml.Text("foo")}
-val x6 = <span>{List(x4)}</span>
+val x6 = <span>{x4}</span>
 val x7 = x6
 val x8 = x7
 val x9 = x3(_ match { case e:xml.Elem => e.copy(child=e.child++x8)})
