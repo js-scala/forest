@@ -29,13 +29,13 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
       // Append its children nodes
       children match {
         // Fold constant lists during the staging phase
-        case Def(ConstList(children)) => {
+        case Left(children) => {
           for (child <- children) {
             stream.println("%s.appendChild(%s);".format(quote(sym), quote(child)))
           }
         }
         // Otherwise loop on children and append them one by one
-        case children => {
+        case Right(children) => {
           val x = fresh[Int]
           stream.println("for (var %s = 0 ; %s < %s.length ; %s++) {".format(quote(x), quote(x), quote(children), quote(x)))
           stream.println("%s.appendChild(%s[%s]);".format(quote(sym), quote(children), quote(x)))

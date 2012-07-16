@@ -7,8 +7,7 @@ val x1 = new org.fusesource.scalate.scuery.Transformer {
 val x2 = x0.cell
 val x3 = $("div")
 val x4 = {xml.Text("foo")}
-val x5 = List(x4)
-val x6 = <span>{x5}</span>
+val x6 = <span>{List(x4)}</span>
 val x7 = x6
 val x8 = x7
 val x9 = x3(_ match { case e:xml.Elem => e.copy(child=e.child++x8)})
@@ -24,7 +23,6 @@ function update(x13) {
 var x15 = x13
 var x16 = $(x15).find("div")
 var x17 = document.createTextNode("foo");
-var x18 = [x17];
 var x19 = document.createElement('span');
 x19.appendChild(x17);
 var x20 = x19

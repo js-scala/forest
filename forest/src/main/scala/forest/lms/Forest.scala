@@ -18,6 +18,8 @@ trait Forest extends Base {
    * @param attrs Tag attributes
    * @param ref Identifier of this node
    */
+  // TODO take a Rep[List[Any]] as attribute values (and add a type constraint to ensure it is a ConstList)
+  // FIXME attribute values should be Strings instead of Any
   def tag(name: String, children: Rep[List[Node]], attrs: Map[String, List[Rep[Any]]], ref: Option[String]): Rep[Node]
 
   /**
@@ -44,8 +46,16 @@ trait Forest extends Base {
  */
 trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
 
-  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) =
-    reflectEffect(Tag(name, children, attrs, ref))
+  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = {
+    reflectEffect {
+      children match {
+        case Def(ConstList(children)) =>
+          Tag(name, Left(children.toList), attrs, ref)
+        case _ =>
+          Tag(name, Right(children), attrs, ref)
+      }
+    }
+  }
 
   override def text(content: List[Exp[Any]]) = reflectEffect(Text(content))
 
@@ -55,23 +65,26 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
 
   case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
 
-  // TODO two version of Tag, one with children: Exp[List[Node]] and the other with children: List[Exp[Node]]
-  case class Tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
+  // FIXME Use Either[List[Exp[Node]], Exp[List[Node]]] instead of TagExpChildren and TagConstChildren
+  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
+
   case class Text(content: List[Exp[Any]]) extends Def[Node]
 
   case class ForestTree(root: Exp[Node]) extends Def[Tree] {
     lazy val refs: Map[String, Exp[Node]] = {
       def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = {
-        def collectRefs2(ref: Option[String], childrenExp: Exp[List[Node]]): Map[String, Exp[Node]] = {
-          val children = childrenExp match {
+        def collectRefs2(ref: Option[String], children: Seq[Exp[Node]]): Map[String, Exp[Node]] =
+          ref.map(_ -> rootNode).toMap ++ children.flatMap(collectRefs)
+        val extractChildren: Either[List[Exp[Node]], Exp[List[Node]]] => Seq[Exp[Node]] = _ match {
+          case Left(children) => children
+          case Right(childrenExp) => childrenExp match {
             case Def(ConstList(children)) => children
             case _ => Nil
           }
-          ref.map(_ -> rootNode).toMap ++ children.flatMap(collectRefs)
         }
         rootNode match {
-          case Def(Tag(_, children, _, ref)) => collectRefs2(ref, children)
-          case Def(Reflect(Tag(_, children, _, ref), _, _)) => collectRefs2(ref, children)
+          case Def(Tag(_, children, _, ref)) => collectRefs2(ref, extractChildren(children))
+          case Def(Reflect(Tag(_, children, _, ref), _, _)) => collectRefs2(ref, extractChildren(children))
           case Def(Text(_)) | Def(Reflect(Text(_), _, _)) => Map.empty // We don’t care of text node for now
           case _ => sys.error("Don’t do that again. Please.")
         }
@@ -81,6 +94,7 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
   }
 
 
+  // FIXME If Map is an Iterable these redefinitions should not be needed
   override def syms(x: Any) = x match {
     case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(syms) ++ syms(children)).toList
     case _ => super.syms(x)

@@ -7,7 +7,6 @@ import java.io.PrintWriter
 /**
  * Scala code generator for `ForestExp` expressions
  */
-// TODO I should extend a more general trait than ScalaGenEffect
 trait ScalaGenForest extends ScalaGenEffect {
   val IR: ForestStringExp with ListOps2Exp
   import IR._
@@ -17,7 +16,7 @@ trait ScalaGenForest extends ScalaGenEffect {
     case Tag(name, children, attrs, _) => {
       val attrsFormatted = (for ((name, value) <- attrs) yield {
         // value is a list of string literals or symbols
-        // TODO dramatically reduce the number of concatenations
+        // TODO dramatically reduce the number of concatenations. Use lower transformations?
         if (value.isEmpty) {
           "\" " + name + "\""
         } else {
@@ -28,11 +27,17 @@ trait ScalaGenForest extends ScalaGenEffect {
           "\" " + name + "=\\\"\" + " + v + " + \"\\\"\""
         }
       }).mkString(" + ")
+      val attrsQuoted = if (attrsFormatted == "") "\"\"" else attrsFormatted
       children match {
-        case Def(ConstList(xs)) if xs.isEmpty =>
-          emitValDef(sym, "\"<%s\" + %s + \" />\"".format(name, if (attrsFormatted == "") "\"\"" else attrsFormatted))
-        case _ =>
-          emitValDef(sym, "\"<%s\" + %s + \">\" + %s.mkString + \"</%s>\"".format(name, if (attrsFormatted == "") "\"\"" else attrsFormatted, quote(children), name))
+        case Left(children) => {
+          if (children.isEmpty) {
+            emitValDef(sym, "\"<%s\" + %s + \" />\"".format(name, attrsQuoted))
+          } else {
+            emitValDef(sym, "\"<%s\" + %s + \">\" + %s + \"</%s>\"".format(name, attrsQuoted, children.map(quote).mkString(" + "), name))
+          }
+        }
+        case Right(children) =>
+          emitValDef(sym, "\"<%s\" + %s + \">\" + %s.mkString + \"</%s>\"".format(name, attrsQuoted, quote(children), name))
       }
     }
 
@@ -66,9 +71,15 @@ trait ScalaGenForestXml extends ScalaGenEffect {
         }
       }).mkString(" ")
       children match {
-        case Def(ConstList(xs)) if xs.isEmpty =>
-          emitValDef(sym, "<%s%s />".format(name, attrsFormatted))
-        case _ =>
+        case Left(children) => {
+          if (children.isEmpty) {
+            emitValDef(sym, "<%s%s />".format(name, attrsFormatted))
+          } else {
+            // TODO optimization when there is only one child (don’t create a list for that)
+            emitValDef(sym, "<%s%s>{%s}</%s>".format(name, attrsFormatted, children.map(quote), name))
+          }
+        }
+        case Right(children) =>
           emitValDef(sym, "<%s%s>{%s}</%s>".format(name, attrsFormatted, quote(children), name))
       }
     }

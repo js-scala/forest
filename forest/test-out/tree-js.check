@@ -1,10 +1,8 @@
 function Tree(x0) {
 var x1 = document.createTextNode("Content: "+x0);
 var x2 = document.createTextNode("Delete");
-var x3 = [x2];
 var x4 = document.createElement('button');
 x4.appendChild(x2);
-var x5 = [x1,x4];
 var x6 = document.createElement('div');
 x6.setAttribute('class', "message");
 x6.appendChild(x1);
