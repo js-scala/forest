@@ -65,7 +65,6 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
 
   case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
 
-  // FIXME Use Either[List[Exp[Node]], Exp[List[Node]]] instead of TagExpChildren and TagConstChildren
   case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
 
   case class Text(content: List[Exp[Any]]) extends Def[Node]
@@ -77,10 +76,7 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
           ref.map(_ -> rootNode).toMap ++ children.flatMap(collectRefs)
         val extractChildren: Either[List[Exp[Node]], Exp[List[Node]]] => Seq[Exp[Node]] = _ match {
           case Left(children) => children
-          case Right(childrenExp) => childrenExp match {
-            case Def(ConstList(children)) => children
-            case _ => Nil
-          }
+          case Right(childrenExp) => Nil
         }
         rootNode match {
           case Def(Tag(_, children, _, ref)) => collectRefs2(ref, extractChildren(children))
@@ -91,18 +87,6 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
       }
       collectRefs(root)
     }
-  }
-
-
-  // FIXME If Map is an Iterable these redefinitions should not be needed
-  override def syms(x: Any) = x match {
-    case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(syms) ++ syms(children)).toList
-    case _ => super.syms(x)
-  }
-
-  override def symsFreq(x: Any) = x match {
-    case Tag(_, children, attrs, _) => (attrs.values.flatten.flatMap(freqNormal) ++ freqNormal(children)).toList
-    case _ => super.symsFreq(x)
   }
 
 }
