@@ -14,3 +14,42 @@ x4
 *******************************************/
 compilation: ok
 <div class="message">Content: Bonjour</div>
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class SeveralChildren extends ((java.lang.String)=>(scala.xml.Node)) {
+def apply(x12:java.lang.String): scala.xml.Node = {
+val x13 = {xml.Text("Hello ")}
+val x14 = {xml.Text(x12)}
+val x16 = <strong>{x14}</strong>
+val x17 = {xml.Text("!")}
+val x19 = <div>{List(x13, x16, x17)}</div>
+val x20 = x19
+x20
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+compilation: ok
+<div>Hello <strong>World</strong>!</div>
+/*****************************************
+  Emitting Generated Code                  
+*******************************************/
+class DynamicChildren extends ((scala.collection.immutable.List[java.lang.String])=>(scala.xml.Node)) {
+def apply(x32:scala.collection.immutable.List[java.lang.String]): scala.xml.Node = {
+val x38 = x32.map { x33 =>
+val x34 = {xml.Text(x33)}
+val x36 = <li>{x34}</li>
+x36
+}
+val x39 = <ul>{x38}</ul>
+val x40 = x39
+x40
+}
+}
+/*****************************************
+  End of Generated Code                  
+*******************************************/
+compilation: ok
+<ul><li>foo</li><li>bar</li><li>baz</li></ul>

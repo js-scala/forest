@@ -24,8 +24,7 @@ trait Forest extends Base {
    * @param attrs Tag attributes
    * @param ref Identifier of this node
    */
-  // TODO take a Rep[List[Any]] as attribute values (and add a type constraint to ensure it is a ConstList)
-  // FIXME attribute values should be Strings instead of Any
+  // TODO take a Rep[List[Any]] as attribute values (and add a type constraint to ensure it is a ConstList. Oops, that would require to pull up the concept of constant list into the Base level)
   def tag(name: String, children: Rep[List[Node]], attrs: Map[String, List[Rep[Any]]], ref: Option[String]): Rep[Node]
 
   /**

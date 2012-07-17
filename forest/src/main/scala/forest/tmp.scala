@@ -98,6 +98,7 @@ trait FieldsInScala extends Fields with JSInScala {
 
 trait ListOps2 extends Base {
 
+  // FIXME Why not let users use scala.List(…) and provide an implicit lifting into Rep[List]?
   object List {
     def apply[A : Manifest](xs: Rep[A]*) = list_new(xs)
   }

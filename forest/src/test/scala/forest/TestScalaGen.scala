@@ -3,32 +3,70 @@ package forest
 import forest.lms._
 import scala.virtualization.lms.common.CompileScala
 import org.scalatest.Suite
+import java.io.PrintWriter
 
 class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
   trait Message extends ForestPkg {
-    def message(content: Rep[String]) = {
+
+    def oneChild(content: Rep[String]): Rep[Tree] = {
       tree(tag("div", List(text("Content: ", content)), Map("class" -> scala.List("message")), None))
     }
+
+    def severalChildren(s: Rep[String]): Rep[Tree] = {
+      tree(tag("div", List(
+          text("Hello "),
+          tag("strong", List(text(s)), Map.empty, None),
+          text("!")
+        ), Map.empty, None))
+    }
+
+    def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {
+      val items = for (x <- xs) yield {
+        tag("li", List(text(x)), Map.empty, None)
+      }
+      tree(tag("ul", items, Map.empty, None))
+    }
+
   }
 
   def testStringGen = testWithOutFile("tree") {
     val prog = new Message with ForestStringPkgExp with CompileScala { self =>
-      override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
-      codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
-      val messageCompiled = compile(self.message)
+      override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
+
+      codegen.emitSource(self.oneChild, "Tree", new PrintWriter(System.out))
+      val messageCompiled = compile(self.oneChild)
       println(messageCompiled("Bonjour"))
+
+      codegen.emitSource(self.severalChildren, "SeveralChildren", new PrintWriter(System.out))
+      val severalChildrenCompiled = compile(self.severalChildren)
+      println(severalChildrenCompiled("World"))
+
+      codegen.emitSource(self.dynamicChildren, "DynamicChildren", new PrintWriter(System.out))
+      val dynamicChildrenCompiled = compile(self.dynamicChildren)
+      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz")))
+
     }
   }
 
   def testXmlGen = testWithOutFile("tree-xml") {
     val prog = new Message with ForestXmlPkgExp with CompileScala { self =>
-      override val codegen = new ScalaGenForestXmlPkg { val IR: self.type = self }
-      codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
 
-      val messageCompiled = compile(self.message)
+      override val codegen = new ScalaGenForestXmlPkg { val IR: self.type = self }
+
+      codegen.emitSource(self.oneChild, "Tree", new PrintWriter(System.out))
+      val messageCompiled = compile(self.oneChild)
       println(messageCompiled("Bonjour"))
+
+      codegen.emitSource(self.severalChildren, "SeveralChildren", new PrintWriter(System.out))
+      val severalChildrenCompiled = compile(self.severalChildren)
+      println(severalChildrenCompiled("World"))
+
+      codegen.emitSource(self.dynamicChildren, "DynamicChildren", new PrintWriter(System.out))
+      val dynamicChildrenCompiled = compile(self.dynamicChildren)
+      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz")))
+
     }
   }
 

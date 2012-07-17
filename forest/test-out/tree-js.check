@@ -10,3 +10,24 @@ x6.appendChild(x4);
 var x7 = {'btn' : x4,'root' : x6}
 return x7
 }
+function OneChild(x9) {
+var x10 = document.createTextNode(x9);
+var x12 = document.createElement('div');
+x12.appendChild(x10);
+var x13 = x12
+return x13
+}
+function DynamicChildren(x15) {
+var x21=x15.map(function(x16){
+var x17 = document.createTextNode(x16);
+var x19 = document.createElement('li');
+x19.appendChild(x17);
+return x19
+});
+var x22 = document.createElement('ul');
+for (var x25 = 0 ; x25 < x21.length ; x25++) {
+x22.appendChild(x21[x25]);
+}
+var x23 = x22
+return x23
+}
