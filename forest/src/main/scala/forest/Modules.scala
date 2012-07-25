@@ -122,11 +122,11 @@ trait JSGenModules extends JSGenEffect {
 
   def emitModule[A : Manifest](module: Exp[Module[A]], name: String, stream: PrintWriter) = module match {
     case Def(ModuleDef(methods)) => {
-      stream.println("window." + name + " = (function (module) {")
+      stream.println("window." + name + " = (function (" + quote(module) + ") {")
       for (method <- methods) {
-        stream.println("module['" + method.name + "'] = " + quoteMethod(method) + ";")
+        stream.println(quote(module) + "['" + method.name + "'] = " + quoteMethod(method) + ";")
       }
-      stream.println("return module")
+      stream.println("return " + quote(module))
       stream.println("})(window." + name + " || {});")
       stream.flush()
     }
