@@ -14,7 +14,7 @@ trait ForestInScala extends Forest with JSInScala {
   override def nodeManifest = manifest[Node]
   override def treeManifest = manifest[Tree]
 
-  override def tag(name: String, children: List[String], attrs: Map[String, List[Any]], ref: Option[String]): String = {
+  override def forest_tag(name: String, attrs: Map[String, List[Any]], children: List[String], ref: Option[String]): String = {
     val formattedAttrs = attrs.foldLeft(""){
       case (attrs, (name, value)) => attrs ++ " %s=\"%s\"".format(name, value.mkString)
     }
@@ -25,11 +25,11 @@ trait ForestInScala extends Forest with JSInScala {
     }
   }
 
-  override def text(xs: List[Any]): String = xs.mkString.replace("<", "&lt;")
+  override def forest_text(xs: List[Any]): String = xs.mkString.replace("<", "&lt;")
 
-  override def tree(root: String): String = root
+  override def forest_tree(root: String): String = root
 
-  implicit def treeToNode(tree: String): String = tree
+  override def treeToNode(tree: String): String = tree
 
 }
 

@@ -11,25 +11,25 @@ class TestJSGen extends FileDiffSuite("test-out/") with Suite {
      * {content: String}
      * div class=message
      *   | Content: {content}
-     *   button /btn
+     *   button
      *     | Delete
      */
     def message(content: Rep[String]): Rep[Tree] = {
-      tree(tag("div", List(
-          text("Content: ", content),
-          tag("button", List(text("Delete")), Map.empty, Some("btn"))
-      ), Map("class" -> scala.List("message")), None))
+      tree(tag("div", "class"->scala.List("message"))(List(
+        text("Content: ", content),
+        tag("button")(List(text("Delete")))
+      )))
     }
 
     def oneChild(s: Rep[String]): Rep[Tree] = {
-      tree(tag("div", List(text(s)), Map.empty, None))
+      tree(tag("div")(List(text(s))))
     }
 
     def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {
       val items = for (x <- xs) yield {
-        tag("li", List(text(x)), Map.empty, None)
+        tag("li")(List(text(x)))
       }
-      tree(tag("ul", items, Map.empty, None))
+      tree(tag("ul")(items))
     }
 
   }

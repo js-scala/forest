@@ -10,22 +10,22 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   trait Message extends ForestPkg {
 
     def oneChild(content: Rep[String]): Rep[Tree] = {
-      tree(tag("div", List(text("Content: ", content)), Map("class" -> scala.List("message")), None))
+      tree(tag("div", "class"->scala.List("message"))(List(text("Content: ", content))))
     }
 
     def severalChildren(s: Rep[String]): Rep[Tree] = {
-      tree(tag("div", List(
-          text("Hello "),
-          tag("strong", List(text(s)), Map.empty, None),
-          text("!")
-        ), Map.empty, None))
+      tree(tag("div")(List(
+        text("Hello "),
+        tag("strong")(List(text(s))),
+        text("!")
+      )))
     }
 
     def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {
       val items = for (x <- xs) yield {
-        tag("li", List(text(x)), Map.empty, None)
+        tag("li")(List(text(x)))
       }
-      tree(tag("ul", items, Map.empty, None))
+      tree(tag("ul")(items))
     }
 
   }

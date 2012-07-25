@@ -22,7 +22,7 @@ class Lms {
   implicit val quoteNode: Quote[Node] = new Quote[Node] {
     override def quote(node: Node) = node match {
       case Tag(name, children, attrs, ref) => {
-        "tag(%s, %s, %s, %s)".format(q(name), q(children)(quoteNodes), q(attrs)(quoteAttrs), q(ref))
+        "tag(%s%s)(%s)".format(q(name), q(attrs)(quoteAttrs), q(children)(quoteNodes))
       }
       case Text(content) => "text(%s)".format(content.map(c => q(c)).mkString(", "))
       case If(cond, thenPart, elsePart) => {
@@ -51,9 +51,9 @@ class Lms {
   object quoteAttrs extends Quote[Map[String, List[TextContent]]] {
     override def quote(attrs: Map[String, List[TextContent]]) = {
       if (attrs.isEmpty) {
-        "Map.empty"
+        ""
       } else {
-        "Map(%s)"
+        ", %s"
             .format((for ((k, vs) <- attrs) yield "(%s, %s)"
                 .format(q(k), "SList(%s)".format((for (v <- vs) yield q(v)).mkString(", ")))).mkString(", "))
       }

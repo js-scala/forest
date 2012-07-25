@@ -2,7 +2,7 @@ name := "compiler"
 
 organization := "forest"
 
-version := "0.2-SNAPSHOT"
+version := "0.3-SNAPSHOT"
 
 mainClass := Some("forest.Run")
 

@@ -7,10 +7,10 @@ class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
 
   trait Prog extends ForestPkg with TreeManipulation {
     def all(xs: Rep[List[String]]): Rep[Tree] = {
-      tree(tag("div", xs map one, Map.empty, None))
+      tree(tag("div")(xs map one))
     }
     def one(x: Rep[String]): Rep[Tree] = {
-      tree(tag("span", List(text(x)), Map.empty, None))
+      tree(tag("span")(List(text(x))))
     }
     def update(r: Rep[NodeRef]) {
       r transform ({ (n: Rep[TransformableNode]) =>

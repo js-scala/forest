@@ -36,15 +36,12 @@ trait Articles extends ForestPkg with ArticleOps {
      *   </dl>
      */
     def show(article: Rep[Article]): Rep[Tree] = {
-      val name = List(
-          tag("dt", List(text("Name")), Map.empty, None), // TODO prevent code optimization: the node creation must be local to this function
-          tag("dd", List(text(article.name)), Map("class"->SList("name")), None)
-      )
-      val price = List(
-          tag("dt", List(text("Price")), Map.empty, None),
-          tag("dd", List(text(article.price, " Euros")), Map.empty, None)
-      )
-      tree(tag("dl", name ++ price, Map[String, List[Rep[Any]]]("class"->(SList(if(article.highlighted) "highlighted" else ""))), None))
+      tree(tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(List(
+        tag("dt")(List(text("Name"))),
+        tag("dd")(List(text(article.name))),
+        tag("dt")(List(text("Price"))),
+        tag("dd")(List(text(article.price, " Euros")))
+      )))
     }
 
     /**
@@ -56,10 +53,11 @@ trait Articles extends ForestPkg with ArticleOps {
      *   </ul>
      */
     def list(articles: Rep[List[Article]]): Rep[Tree] = {
-      val items = for (article <- articles) yield {
-        tag("li", List(show(article)), Map.empty, None)
-      }
-      tree(tag("ul", items, Map.empty, Some("root")))
+      tree(tag("ul")(
+        for (article <- articles) yield {
+          tag("li")(List(show(article)))
+        }
+      ))
     }
   }
   def Articles = module[Articles] // TODO I’d like to just write “object Articles extends Articles”
@@ -106,7 +104,7 @@ object Main extends App {
                     highlighted: false
                   });
                   var li = document.createElement('li');
-                  li.appendChild(articleTree.root);
+                  li.appendChild(articleTree);
                   document.querySelector('ul').appendChild(li);
                 };
                 var freshBtn = document.getElementById('fresh-list');
@@ -121,7 +119,7 @@ object Main extends App {
                     highlighted: false
                   }]);
                   var ul = document.querySelector('ul');
-                  ul.parentNode.replaceChild(tree.root, ul);
+                  ul.parentNode.replaceChild(tree, ul);
                 };
               })();
             </script>

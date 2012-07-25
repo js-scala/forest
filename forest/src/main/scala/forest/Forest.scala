@@ -1,13 +1,7 @@
 package forest
 
-import scala.Option.option2Iterable
-import scala.Tuple2.apply
-import scala.js.JS
-import scala.js.JSExp
-import scala.js.JSProxyBase
-import scala.js.JSProxyExp
-import scala.virtualization.lms.common.Base
-import scala.virtualization.lms.common.EffectExp
+import scala.js._
+import scala.virtualization.lms.common._
 
 /**
  * Forest DSL interface
@@ -22,24 +16,16 @@ trait Forest extends Base {
    * @param name Tag name (“div”, “span”, etc.)
    * @param children Nested tags
    * @param attrs Tag attributes
-   * @param ref Identifier of this node
    */
-  // TODO take a Rep[List[Any]] as attribute values (and add a type constraint to ensure it is a ConstList. Oops, that would require to pull up the concept of constant list into the Base level)
-  def tag(name: String, children: Rep[List[Node]], attrs: Map[String, List[Rep[Any]]], ref: Option[String]): Rep[Node]
+  def forest_tag(name: String, attrs: Map[String, List[Rep[Any]]], children: Rep[List[Node]], ref: Option[String]): Rep[Node]
 
   /**
    * Creates a text node (e.g. `foo`)
    * @param xs Elements of the text node. The type of `xs` is `List` to allow to mix string literal (e.g. `"foo"`) and symbols (e.g. `foo.bar`)
    */
-  def text(xs: List[Rep[Any]]): Rep[Node]
-  def text(xs: Rep[Any]*): Rep[Node] = text(xs.toList) // Convenient overload
+  def forest_text(xs: List[Rep[Any]]): Rep[Node]
 
-  /**
-   * Creates a tree from a given node
-   * Isn’t a `Node` already a `Tree`? In Scala, yes. In JavaScript, no: a `Tree` is an object containing references to some nodes.
-   * @param root Tree root node
-   */
-  def tree(root: Rep[Node]): Rep[Tree]
+  def forest_tree(root: Rep[Node]): Rep[Tree]
   implicit def treeToNode(tree: Rep[Tree]): Rep[Node]
 
   implicit def nodeManifest: Manifest[Node]
@@ -47,11 +33,32 @@ trait Forest extends Base {
 }
 
 /**
+ * Sweeter syntax
+ * {{{
+ *   tag("div", "class"->List("article"), "data-id"->List(42))(List(
+ *     tag("span")(List(text("Name: ", article.name))),
+ *     tag("span")(List(text("Description: ", article.description)))
+ *   ))
+ * }}}
+ */
+trait ForestDSL extends Forest { this: ListOps2 =>
+
+  def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
+    forest_tag(name, attrs.toMap, children, None)
+
+  def text(xs: Rep[Any]*) =
+    forest_text(xs.toList)
+
+  def tree(root: Rep[Node]) =
+    forest_tree(root)
+}
+
+/**
  * Forest DSL encoding as an AST
  */
 trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
 
-  override def tag(name: String, children: Exp[List[Node]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) = {
+  override def forest_tag(name: String, attrs: Map[String, List[Exp[Any]]], children: Exp[List[Node]], ref: Option[String]) = {
     reflectEffect {
       children match {
         case Def(ConstList(children)) =>
@@ -62,9 +69,9 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
     }
   }
 
-  override def text(content: List[Exp[Any]]) = reflectEffect(Text(content))
+  override def forest_text(content: List[Exp[Any]]) = reflectEffect(Text(content))
 
-  override def tree(root: Exp[Node]) = ForestTree(root)
+  override def forest_tree(root: Exp[Node]) = ForestTree(root)
 
   override def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
 
@@ -120,7 +127,7 @@ trait ForestStringExp extends ForestExp { this: ListOps2Exp =>
 
 // --- Convenient packages
 
-trait ForestPkg extends Forest with JS with ListOps2 with Modules with JSProxyBase
+trait ForestPkg extends Forest with ForestDSL with JS with ListOps2 with Modules with JSProxyBase
 trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
 trait ForestStringPkgExp extends ForestPkgExp with ForestStringExp
 trait ForestXmlPkgExp extends ForestPkgExp with ForestXmlExp
