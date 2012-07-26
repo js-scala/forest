@@ -17,7 +17,7 @@ trait Forest extends Base {
    * @param children Nested tags
    * @param attrs Tag attributes
    */
-  def forest_tag(name: String, attrs: Map[String, List[Rep[Any]]], children: Rep[List[Node]], ref: Option[String]): Rep[Node]
+  def forest_tag(name: String, attrs: Map[String, List[Rep[Any]]], children: Rep[List[Node]]): Rep[Node]
 
   /**
    * Creates a text node (e.g. `foo`)
@@ -25,8 +25,17 @@ trait Forest extends Base {
    */
   def forest_text(xs: List[Rep[Any]]): Rep[Node]
 
-  def forest_tree(root: Rep[Node]): Rep[Tree]
-  implicit def treeToNode(tree: Rep[Tree]): Rep[Node]
+  /**
+   * Creates a tree
+   * @param root Tree root node
+   * @param refs Additional node references
+   */
+  def forest_tree(root: Rep[Node], refs: Map[String, Rep[Node]]): Rep[Tree]
+
+  def infix_root(tree: Rep[Tree]): Rep[Node]
+  implicit def treeToRoot(tree: Rep[Tree]): Rep[Node] = tree.root
+
+  def infix_ref(tree: Rep[Tree], ref: String): Rep[Node]
 
   implicit def nodeManifest: Manifest[Node]
   implicit def treeManifest: Manifest[Tree]
@@ -35,99 +44,63 @@ trait Forest extends Base {
 /**
  * Sweeter syntax
  * {{{
- *   tag("div", "class"->List("article"), "data-id"->List(42))(List(
+ *   tree(tag("div", "class"->List("article"), "data-id"->List(42))(List(
  *     tag("span")(List(text("Name: ", article.name))),
  *     tag("span")(List(text("Description: ", article.description)))
- *   ))
+ *   )))
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps2 =>
 
   def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
-    forest_tag(name, attrs.toMap, children, None)
+    forest_tag(name, attrs.toMap, children)
 
   def text(xs: Rep[Any]*) =
     forest_text(xs.toList)
 
-  def tree(root: Rep[Node]) =
-    forest_tree(root)
+  def tree(root: Rep[Node], refs: (String, Rep[Node])*) =
+    forest_tree(root, refs.toMap)
 }
 
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp { this: ListOps2Exp =>
+trait ForestExp extends Forest with EffectExp { this: ListOps2Exp with StructExp =>
 
-  override def forest_tag(name: String, attrs: Map[String, List[Exp[Any]]], children: Exp[List[Node]], ref: Option[String]) = {
+  override def forest_tag(name: String, attrs: Map[String, List[Exp[Any]]], children: Exp[List[Node]]) = {
     reflectEffect {
       children match {
         case Def(ConstList(children)) =>
-          Tag(name, Left(children.toList), attrs, ref)
+          Tag(name, Left(children.toList), attrs)
         case _ =>
-          Tag(name, Right(children), attrs, ref)
+          Tag(name, Right(children), attrs)
       }
     }
   }
 
   override def forest_text(content: List[Exp[Any]]) = reflectEffect(Text(content))
 
-  override def forest_tree(root: Exp[Node]) = ForestTree(root)
+  override def forest_tree(root: Exp[Node], refs: Map[String, Exp[Node]]) = struct(ClassTag[Tree]("Tree"), refs + ("root"->root))
 
-  override def treeToNode(tree: Exp[Tree]): Exp[Node] = TreeRoot(tree)
+  override def infix_root(tree: Exp[Tree]) = field[Node](tree, "root")
 
-  case class TreeRoot(tree: Exp[Tree]) extends Def[Node]
+  override def infix_ref(tree: Exp[Tree], ref: String) = field[Node](tree, ref)
 
-  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, List[Exp[Any]]], ref: Option[String]) extends Def[Node]
+
+  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, List[Exp[Any]]]) extends Def[Node]
 
   case class Text(content: List[Exp[Any]]) extends Def[Node]
 
-  case class ForestTree(root: Exp[Node]) extends Def[Tree] {
-    lazy val refs: Map[String, Exp[Node]] = {
-      def collectRefs(rootNode: Exp[Node]): Map[String, Exp[Node]] = {
-        def collectRefs2(ref: Option[String], children: Seq[Exp[Node]]): Map[String, Exp[Node]] =
-          ref.map(_ -> rootNode).toMap ++ children.flatMap(collectRefs)
-        val extractChildren: Either[List[Exp[Node]], Exp[List[Node]]] => Seq[Exp[Node]] = _ match {
-          case Left(children) => children
-          case Right(childrenExp) => Nil
-        }
-        rootNode match {
-          case Def(Tag(_, children, _, ref)) => collectRefs2(ref, extractChildren(children))
-          case Def(Reflect(Tag(_, children, _, ref), _, _)) => collectRefs2(ref, extractChildren(children))
-          case Def(Text(_)) | Def(Reflect(Text(_), _, _)) => Map.empty // We don’t care of text node for now
-          case _ => sys.error("Don’t do that again. Please.")
-        }
-      }
-      collectRefs(root)
-    }
-  }
 
-}
-
-/**
- * Represents HTML with scala XML standard library
- */
-trait ForestXmlExp extends ForestExp { this: ListOps2Exp =>
   override type Node = scala.xml.Node
-  override type Tree = scala.xml.Node
-
+  override type Tree = Map[String, Node] // Because I know structs generate Scala Map
   override def nodeManifest = manifest[Node]
   override def treeManifest = manifest[Tree]
 }
 
-/**
- * Represents HTML with text
- */
-trait ForestStringExp extends ForestExp { this: ListOps2Exp =>
-  override type Node = String
-  override type Tree = String
-
-  override def nodeManifest = manifest[Node]
-  override def treeManifest = manifest[Tree]
-}
 
 // --- Convenient packages
 
+// TODO do not include JS. Use common LMS traits.
 trait ForestPkg extends Forest with ForestDSL with JS with ListOps2 with Modules with JSProxyBase
-trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with ModulesExp with JSProxyExp
-trait ForestStringPkgExp extends ForestPkgExp with ForestStringExp
-trait ForestXmlPkgExp extends ForestPkgExp with ForestXmlExp
+trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with StructExp with ModulesExp with JSProxyExp

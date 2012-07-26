@@ -1,14 +1,7 @@
 package forest
 
-import scala.js.JSGenBase
-import scala.js.JSGenEffect
-import scala.js.JSInScala
-import scala.js.JSProxyExp
-import scala.virtualization.lms.common.Base
-import scala.virtualization.lms.common.BaseExp
-import scala.virtualization.lms.common.EffectExp
-import scala.virtualization.lms.common.ScalaGenBase
-import scala.virtualization.lms.common.ScalaGenEffect
+import scala.js._
+import scala.virtualization.lms.common._
 
 // --- Case classes support
 
@@ -65,8 +58,8 @@ trait Fields extends Base { fields =>
 }
 
 trait FieldsExp extends Fields with BaseExp {
-  case class Field[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
-  override def field[A, B : Manifest](target: Rep[A], name: String): Rep[B] = toAtom(Field(target, name)) // FIXME Why do I need to write toAtom explicitly?
+  case class FieldsField[A, B : Manifest](target: Exp[A], name: String) extends Def[B]
+  override def field[A, B : Manifest](target: Rep[A], name: String): Rep[B] = toAtom(FieldsField(target, name)) // FIXME Why do I need to write toAtom explicitly?
 }
 
 trait JSGenFields extends JSGenBase {
@@ -74,7 +67,7 @@ trait JSGenFields extends JSGenBase {
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case FieldsField(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -84,7 +77,7 @@ trait ScalaGenFields extends ScalaGenBase {
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case Field(o, n) => emitValDef(sym, quote(o) + "." + n)
+    case FieldsField(o, n) => emitValDef(sym, quote(o) + "." + n)
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -263,6 +256,23 @@ trait ScalaGenProxy extends ScalaGenBase with ScalaGenEffect {
     emitValDef(sym, quote(receiver) + "." + field + " = " + quote(value))
 
   case _ => super.emitNode(sym, rhs)
+  }
+
+}
+
+// --- Struct JS code generation
+
+trait JSGenStruct extends JSGenBase { this: JSGenLiteral with JSGenStruct =>
+
+  val IR: StructExp with JSLiteralExp
+  import IR._
+  
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case Struct(_, elems) =>
+      emitNode(sym, JSLiteralDef(elems.toList))
+    case Field(struct, index, _) =>
+      emitNode(sym, MemberSelect(struct, index))
+    case _ => super.emitNode(sym, rhs)
   }
 
 }

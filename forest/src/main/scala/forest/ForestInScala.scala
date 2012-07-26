@@ -1,36 +1,33 @@
 package forest
 
-import scala.js.JSInScala
-import scala.js.JSProxyInScala
+import scala.js._
+import scala.xml._
 
 /**
  * Simple interpreter for Forest programs
  */
 trait ForestInScala extends Forest with JSInScala {
 
-  override type Node = String
-  override type Tree = String
+  override type Node = scala.xml.Node
+  override type Tree = Map[String, Node]
 
   override def nodeManifest = manifest[Node]
   override def treeManifest = manifest[Tree]
 
-  override def forest_tag(name: String, attrs: Map[String, List[Any]], children: List[String], ref: Option[String]): String = {
-    val formattedAttrs = attrs.foldLeft(""){
-      case (attrs, (name, value)) => attrs ++ " %s=\"%s\"".format(name, value.mkString)
+  override def forest_tag(name: String, attrs: Map[String, List[Any]], children: List[Node]) = {
+    val metadatas = attrs.foldLeft[MetaData](Null) {
+      case (metadatas, (name, value)) => new UnprefixedAttribute(name, value.mkString, metadatas)
     }
-    if (children.isEmpty) {
-      "<%s%s />".format(name, formattedAttrs)
-    } else {
-      "<%s%s>%s</%s>".format(name, formattedAttrs, children.mkString, name)
-    }
+    Elem(null, name, metadatas, TopScope, children: _*)
   }
 
-  override def forest_text(xs: List[Any]): String = xs.mkString.replace("<", "&lt;")
+  override def forest_text(xs: List[Any]) = Text(xs.mkString)
 
-  override def forest_tree(root: String): String = root
+  override def forest_tree(root: Node, refs: Map[String, Node]) = Map((refs + ("root"->root)).toSeq: _*)
 
-  override def treeToNode(tree: String): String = tree
+  override def infix_root(tree: Map[String, Node]) = tree("root")
 
+  override def infix_ref(tree: Map[String, Node], ref: String) = tree(ref)
 }
 
 trait ForestInScalaPkg extends ForestInScala with ListOps2InScala with ModulesInScala with JSProxyInScala

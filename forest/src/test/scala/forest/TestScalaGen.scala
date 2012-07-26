@@ -30,42 +30,22 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
   }
 
-  def testStringGen = testWithOutFile("tree") {
-    val prog = new Message with ForestStringPkgExp with CompileScala { self =>
+  def testXmlGen = testWithOutFile("tree-scala") {
+    val prog = new Message with ForestPkgExp with CompileScala { self =>
 
       override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
 
       codegen.emitSource(self.oneChild, "Tree", new PrintWriter(System.out))
       val messageCompiled = compile(self.oneChild)
-      println(messageCompiled("Bonjour"))
+      println(messageCompiled("Bonjour")("root"))
 
       codegen.emitSource(self.severalChildren, "SeveralChildren", new PrintWriter(System.out))
       val severalChildrenCompiled = compile(self.severalChildren)
-      println(severalChildrenCompiled("World"))
+      println(severalChildrenCompiled("World")("root"))
 
       codegen.emitSource(self.dynamicChildren, "DynamicChildren", new PrintWriter(System.out))
       val dynamicChildrenCompiled = compile(self.dynamicChildren)
-      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz")))
-
-    }
-  }
-
-  def testXmlGen = testWithOutFile("tree-xml") {
-    val prog = new Message with ForestXmlPkgExp with CompileScala { self =>
-
-      override val codegen = new ScalaGenForestXmlPkg { val IR: self.type = self }
-
-      codegen.emitSource(self.oneChild, "Tree", new PrintWriter(System.out))
-      val messageCompiled = compile(self.oneChild)
-      println(messageCompiled("Bonjour"))
-
-      codegen.emitSource(self.severalChildren, "SeveralChildren", new PrintWriter(System.out))
-      val severalChildrenCompiled = compile(self.severalChildren)
-      println(severalChildrenCompiled("World"))
-
-      codegen.emitSource(self.dynamicChildren, "DynamicChildren", new PrintWriter(System.out))
-      val dynamicChildrenCompiled = compile(self.dynamicChildren)
-      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz")))
+      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz"))("root"))
 
     }
   }

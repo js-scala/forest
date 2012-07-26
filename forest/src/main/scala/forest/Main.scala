@@ -21,9 +21,8 @@ trait ArticleOps extends Base with Fields {
 
 // --- Example of template definition
 
-// TODO routes & i18n. Don’t use JS trait.
+// TODO routes & i18n.
 trait Articles extends ForestPkg with ArticleOps {
-  // TODO always use List, never use SList (but perform optimizations on generated code)
   import collection.immutable.{List => SList}
 
   trait Articles {
@@ -35,13 +34,13 @@ trait Articles extends ForestPkg with ArticleOps {
      *     <dt>Price</dt><dd>{article.price}</dd>
      *   </dl>
      */
-    def show(article: Rep[Article]): Rep[Tree] = {
-      tree(tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(List(
+    def show(article: Rep[Article]) = {
+      tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(List(
         tag("dt")(List(text("Name"))),
         tag("dd")(List(text(article.name))),
         tag("dt")(List(text("Price"))),
         tag("dd")(List(text(article.price, " Euros")))
-      )))
+      ))
     }
 
     /**
@@ -52,7 +51,7 @@ trait Articles extends ForestPkg with ArticleOps {
      *     }
      *   </ul>
      */
-    def list(articles: Rep[List[Article]]): Rep[Tree] = {
+    def list(articles: Rep[List[Article]]) = {
       tree(tag("ul")(
         for (article <- articles) yield {
           tag("li")(List(show(article)))
@@ -67,10 +66,10 @@ trait Articles extends ForestPkg with ArticleOps {
 
 object Main extends App {
 
-  object JSProg extends Articles with ForestStringPkgExp with FieldsExp
+  object JSProg extends Articles with ForestPkgExp with FieldsExp
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy { val IR: JSProg.type  = JSProg }
+  val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy with JSGenStruct { val IR: JSProg.type  = JSProg }
   jsCodegen.emitModule(JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
 
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }
@@ -119,12 +118,12 @@ object Main extends App {
                     highlighted: false
                   }]);
                   var ul = document.querySelector('ul');
-                  ul.parentNode.replaceChild(tree, ul);
+                  ul.parentNode.replaceChild(tree.root, ul);
                 };
               })();
             </script>
           </body>
-        </html>""".format(Articles.list(articles)))
+        </html>""".format(Articles.list(articles)("root")))
       target.close()
     }
 

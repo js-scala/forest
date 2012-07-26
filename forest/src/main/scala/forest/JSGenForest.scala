@@ -13,7 +13,7 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
-    case Tag(name, children, attrs, ref) => {
+    case Tag(name, children, attrs) => {
       // Create the element
       emitValDef(sym, s"document.createElement('$name');")
       // Add its attributes
@@ -46,42 +46,10 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
     case Text(content) =>
       emitValDef(sym, "document.createTextNode(%s);".format(content.map(quote).mkString("+")))
 
-    case tree @ ForestTree(root) => {
-      if (tree.refs.isEmpty) {
-        // No reference found: just return the root node itself.
-        emitValDef(sym, quote(root))
-      } else {
-        // Otherwise return a literal object containing all references.
-        val refs = root match {
-          case Def(Tag(_, _, _, ref)) if ref.isEmpty => tree.refs + ("root" -> root)
-          case Def(Reflect(Tag(_, _, _, ref), _, _)) if ref.isEmpty => tree.refs + ("root" -> root)
-          case _ => tree.refs
-        }
-        emitNode(sym, JSLiteralDef(refs.toList)) // FIXME Is it the right way to reuse JSLiteral code generator?
-      }
-    }
-
-    case TreeRoot(tree) => {
-      def root(tree: ForestTree): String = {
-        val ref = tree.root match {
-          case Def(Tag(_, _, _, ref)) => ref
-          case Def(Reflect(Tag(_, _, _, ref), _, _)) => ref
-          case _ => None
-        }
-        ref.map("." + _).getOrElse(if (tree.refs.isEmpty) "" else ".root")
-      }
-      val rootField = tree match {
-        case Def(tree: ForestTree) => root(tree)
-        case Def(Reflect(tree: ForestTree, _, _)) => root(tree)
-        case _ => "" // TODO handle Def(Reflect(MethodCall))…
-      }
-      emitValDef(sym, quote(tree) + rootField)
-    }
-
     case _ => super.emitNode(sym, node)
   }
 }
 
-trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules {
+trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules with JSGenStruct {
   val IR: ForestPkgExp
 }

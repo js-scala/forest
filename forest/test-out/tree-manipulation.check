@@ -1,3 +1,4 @@
+WARNING: emitting field access: x7.root
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
@@ -8,8 +9,8 @@ val x2 = x0.cell
 val x3 = $("div")
 val x4 = {xml.Text("foo")}
 val x6 = <span>{x4}</span>
-val x7 = x6
-val x8 = x7
+val x7 = Map("root"->x6) //ClassTag(Tree)
+val x8 = x7("root").asInstanceOf[scala.xml.Node]
 val x9 = x3(_ match { case e:xml.Elem => e.copy(child=e.child++x8)})
 }
 val x11 = x0.cell = x1(x0.cell)
@@ -25,8 +26,8 @@ var x16 = $(x15).find("div")
 var x17 = document.createTextNode("foo");
 var x19 = document.createElement('span');
 x19.appendChild(x17);
-var x20 = x19
-var x21 = x20
+var x20 = {'root' : x19}
+var x21 = x20.root
 var x22 = x16.append(x21)
 var x24 = x22
 return undefined

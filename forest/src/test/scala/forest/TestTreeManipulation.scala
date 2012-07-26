@@ -20,8 +20,8 @@ class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testAppending() = testWithOutFile("tree-manipulation") {
-    val prog = new Prog with ForestXmlPkgExp with TreeManipulationExp { self =>
-      val scalaCodegen = new ScalaGenForestXmlPkg with ScalaGenTreeManipulation { val IR: self.type = self }
+    val prog = new Prog with ForestPkgExp with TreeManipulationExp { self =>
+      val scalaCodegen = new ScalaGenForestPkg with ScalaGenTreeManipulation { val IR: self.type = self }
       val jsCodegen = new JSGenForestPkg with JSGenTreeManipulation { val IR: self.type = self }
       
       scalaCodegen.emitSource(self.update, "Update", new java.io.PrintWriter(System.out))
