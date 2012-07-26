@@ -14,11 +14,12 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
     }
 
     def severalChildren(s: Rep[String]): Rep[Tree] = {
+      val greeted = tag("strong")(List(text(s)))
       tree(tag("div")(List(
         text("Hello "),
-        tag("strong")(List(text(s))),
+        greeted,
         text("!")
-      )))
+      )), "greeted"->greeted)
     }
 
     def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {

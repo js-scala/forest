@@ -19,12 +19,12 @@ compilation: ok
 *******************************************/
 class SeveralChildren extends ((java.lang.String)=>(scala.collection.immutable.Map[java.lang.String, scala.xml.Node])) {
 def apply(x12:java.lang.String): scala.collection.immutable.Map[java.lang.String, scala.xml.Node] = {
-val x13 = {xml.Text("Hello ")}
-val x14 = {xml.Text(x12)}
-val x16 = <strong>{x14}</strong>
+val x13 = {xml.Text(x12)}
+val x15 = <strong>{x13}</strong>
+val x16 = {xml.Text("Hello ")}
 val x17 = {xml.Text("!")}
-val x19 = <div>{List(x13, x16, x17)}</div>
-val x20 = Map("root"->x19) //ClassTag(Tree)
+val x19 = <div>{List(x16, x15, x17)}</div>
+val x20 = Map("greeted"->x15,"root"->x19) //ClassTag(Tree)
 x20
 }
 }
