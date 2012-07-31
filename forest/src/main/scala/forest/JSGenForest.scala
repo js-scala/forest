@@ -1,14 +1,13 @@
 package forest
 
-import scala.js.JSExp
-import scala.js.JSGen
-import scala.js.JSGenProxy
+import scala.virtualization.lms.common._
+import scala.js._
 
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends JSGen with JSGenListOps2 {
-  val IR: ForestExp with JSExp with ListOps2Exp
+trait JSGenForest extends JSGen {
+  val IR: ForestExp with JSExp
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
@@ -50,6 +49,6 @@ trait JSGenForest extends JSGen with JSGenListOps2 {
   }
 }
 
-trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules with JSGenStruct {
+trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules with JSGenStruct with JSGenListOps {
   val IR: ForestPkgExp
 }

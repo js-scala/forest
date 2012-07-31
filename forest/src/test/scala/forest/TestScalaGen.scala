@@ -1,6 +1,6 @@
 package forest
 
-import forest.lms._
+import forest._
 import scala.virtualization.lms.common.CompileScala
 import org.scalatest.Suite
 import java.io.PrintWriter

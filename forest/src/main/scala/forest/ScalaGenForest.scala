@@ -7,7 +7,7 @@ import scala.virtualization.lms.common._
  * Scala code generator for `ForestExp` expressions
  */
 trait ScalaGenForest extends ScalaGenEffect {
-  val IR: ForestExp with ListOps2Exp
+  val IR: ForestExp
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
@@ -52,6 +52,6 @@ trait ScalaGenForest extends ScalaGenEffect {
 
 }
 
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps2 with ScalaGenStruct {
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps with ScalaGenStruct {
   val IR: ForestPkgExp
 }

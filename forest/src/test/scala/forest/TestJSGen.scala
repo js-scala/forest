@@ -1,7 +1,7 @@
 package forest
 
-import forest.lms._
-import scala.virtualization.lms.common.CompileScala
+import forest._
+import scala.virtualization.lms.common._
 import org.scalatest.Suite
 
 class TestJSGen extends FileDiffSuite("test-out/") with Suite {

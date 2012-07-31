@@ -1,9 +1,8 @@
 package forest
 
 import java.io.PrintWriter
-import scala.collection.immutable.{List => SList}
-import scala.js.JSGenProxy
-import scala.virtualization.lms.common.Base
+import scala.js._
+import scala.virtualization.lms.common._
 
 // --- Business class definition
 
@@ -69,7 +68,7 @@ object Main extends App {
   object JSProg extends Articles with ForestPkgExp with FieldsExp
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenForest with JSGenFields with JSGenModules with JSGenProxy with JSGenStruct { val IR: JSProg.type  = JSProg }
+  val jsCodegen = new JSGenForestPkg with JSGenFields { val IR: JSProg.type  = JSProg }
   jsCodegen.emitModule(JSProg.Articles, "Articles", new PrintWriter("target/show-article.js"))
 
   /*val scalaCodegen = new ScalaGenForest with ScalaGenFunctions with ScalaGenArticleOps with ScalaGenModules { val IR: self.type = self }

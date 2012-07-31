@@ -50,7 +50,7 @@ trait Forest extends Base {
  *   )))
  * }}}
  */
-trait ForestDSL extends Forest { this: ListOps2 =>
+trait ForestDSL extends Forest { this: ListOps =>
 
   def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
     forest_tag(name, attrs.toMap, children)
@@ -65,12 +65,12 @@ trait ForestDSL extends Forest { this: ListOps2 =>
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp { this: ListOps2Exp with StructExp =>
+trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp =>
 
   override def forest_tag(name: String, attrs: Map[String, List[Exp[Any]]], children: Exp[List[Node]]) = {
     reflectEffect {
       children match {
-        case Def(ConstList(children)) =>
+        case Def(ListNew(children)) =>
           Tag(name, Left(children.toList), attrs)
         case _ =>
           Tag(name, Right(children), attrs)
@@ -102,5 +102,5 @@ trait ForestExp extends Forest with EffectExp { this: ListOps2Exp with StructExp
 // --- Convenient packages
 
 // TODO do not include JS. Use common LMS traits.
-trait ForestPkg extends Forest with ForestDSL with JS with ListOps2 with Modules with JSProxyBase
-trait ForestPkgExp extends ForestExp with JSExp with ListOps2Exp with ListOps2Opt with StructExp with ModulesExp with JSProxyExp
+trait ForestPkg extends Forest with ForestDSL with JS with ListOps with Modules with JSProxyBase
+trait ForestPkgExp extends ForestExp with JSExp with ListOpsExp with ListOpsExpOpt with StructExp with ModulesExp with JSProxyExp

@@ -2,6 +2,7 @@ package forest
 
 import scala.js._
 import scala.virtualization.lms.common._
+import scala.reflect.SourceContext
 
 // --- Case classes support
 
@@ -87,151 +88,30 @@ trait FieldsInScala extends Fields with JSInScala {
 }
 
 
-// --- Rep[List] support
+// --- List support
 
-trait ListOps2 extends Base {
-
-  // FIXME Why not let users use scala.List(…) and provide an implicit lifting into Rep[List]?
-  object List {
-    def apply[A : Manifest](xs: Rep[A]*) = list_new(xs)
-  }
-
-  implicit def repToOps[A : Manifest](xs: Rep[List[A]]) = new ListOps2Cls(xs)
-
-  class ListOps2Cls[A : Manifest](xs: Rep[List[A]]) {
-    def flatMap[B : Manifest](f: Rep[A] => Rep[List[B]]) = list_flatMap(f)(xs)
-    def map[B : Manifest](f: Rep[A] => Rep[B]) = list_map(f)(xs)
-    def ++ (xs2: Rep[List[A]]) = list_concat(xs, xs2)
-    def mkString = list_mkString(xs)
-  }
-
-  def list_new[A : Manifest](xs: Seq[Rep[A]]): Rep[List[A]]
-  def list_flatMap[A : Manifest, B : Manifest](f: Rep[A] => Rep[List[B]])(xs: Rep[List[A]]): Rep[List[B]]
-  def list_map[A : Manifest, B : Manifest](f: Rep[A] => Rep[B])(xs: Rep[List[A]]): Rep[List[B]]
-  def list_concat[A : Manifest](xs1: Rep[List[A]], xs2: Rep[List[A]]): Rep[List[A]]
-  def list_mkString[A : Manifest](xs: Rep[List[A]]): Rep[String]
-}
-
-trait ListOps2Exp extends ListOps2 with EffectExp {
-
-  def list_new[A : Manifest](xs: Seq[Rep[A]]) = ConstList(xs)
-  def list_flatMap[A : Manifest, B : Manifest](f: Exp[A] => Exp[List[B]])(xs: Exp[List[A]]) = {
-    val x = fresh[A]
-    val b = reifyEffects(f(x))
-    reflectEffect(ListFlatMap(xs, x, b), Alloc() andAlso summarizeEffects(b).star)
-  }
-  def list_map[A : Manifest, B : Manifest](f: Exp[A] => Exp[B])(xs: Exp[List[A]]) = {
-    val x = fresh[A]
-    val b = reifyEffects(f(x))
-    reflectEffect(ListMap(xs, x, b), Alloc() andAlso summarizeEffects(b).star)
-  }
-  def list_concat[A : Manifest](xs1: Exp[List[A]], xs2: Exp[List[A]]) = ListConcat(xs1, xs2)
-  def list_mkString[A : Manifest](xs: Exp[List[A]]) = ListMkString(xs)
-
-  case class ConstList[A : Manifest](xs: Seq[Rep[A]]) extends Def[List[A]]
-  case class ListFlatMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Block[List[B]]) extends Def[List[B]]
-  case class ListMap[A, B : Manifest](l: Exp[List[A]], x: Sym[A], block: Block[B]) extends Def[List[B]]
-  case class ListConcat[A : Manifest](l1: Exp[List[A]], l2: Exp[List[A]]) extends Def[List[A]]
-  case class ListMkString[A : Manifest](l: Exp[List[A]]) extends Def[String]
-
-  override def syms(e: Any): List[Sym[Any]] = e match {
-    case ConstList(xs) => xs.flatMap(syms).toList
-    case ListFlatMap(l, _, b) => syms(l) ::: syms(b)
-    case ListMap(l, _, b) => syms(l) ::: syms(b)
-    case _ => super.syms(e)
-  }
-
-  override def boundSyms(e: Any): List[Sym[Any]] = e match {
-    case ConstList(xs) => xs.flatMap(effectSyms).toList
-    case ListFlatMap(_, x, b) => x :: effectSyms(b)
-    case ListMap(_, x, b) => x :: effectSyms(b)
-    case _ => super.boundSyms(e)
-  }
-
-  override def symsFreq(e: Any): List[(Sym[Any], Double)] = e match {
-    case ConstList(xs) => xs.flatMap(freqNormal).toList
-    case ListFlatMap(l, _, b) => freqNormal(l) ::: freqHot(b)
-    case ListMap(l, _, b) => freqNormal(l) ::: freqHot(b)
-    case _ => super.symsFreq(e)
-  }
-
-}
-
-trait ListOps2Opt extends ListOps2Exp {
-  override def list_concat[A : Manifest](xs1: Exp[List[A]], xs2: Exp[List[A]]): Exp[List[A]] = (xs1, xs2) match {
-    case (Def(ConstList(xs1)), Def(ConstList(xs2))) => ConstList(xs1 ++ xs2)
+trait ListOpsExpOpt extends ListOpsExp {
+  override def list_concat[A : Manifest](xs1: Exp[List[A]], xs2: Exp[List[A]])(implicit pos: SourceContext): Exp[List[A]] = (xs1, xs2) match {
+    case (Def(ListNew(xs1)), Def(ListNew(xs2))) => ListNew(xs1 ++ xs2)
     case _ => super.list_concat(xs1, xs2)
   }
 }
 
-trait ScalaGenListOps2 extends ScalaGenEffect {
-  val IR: ListOps2Exp
-  import IR._
-
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ConstList(xs) => {
-      emitValDef(sym, "List(" + xs.map(quote).mkString(", ") + ")")
-    }
-    case ListFlatMap(l, x, b) => {
-      stream.println("val " + quote(sym) + " = " + quote(l) + ".flatMap { " + quote(x) + " => ")
-      emitBlock(b)
-      stream.println(quote(getBlockResult(b)))
-      stream.println("}")
-    }
-    case ListMap(l, x, b) => {
-      stream.println("val " + quote(sym) + " = " + quote(l) + ".map { " + quote(x) + " =>")
-      emitBlock(b)
-      stream.println(quote(getBlockResult(b)))
-      stream.println("}")
-    }
-    case ListConcat(l1, l2) => emitValDef(sym, quote(l1) + " ++ " + quote(l2))
-    case _ => super.emitNode(sym, rhs)
-  }
-}
-
-trait JSGenListOps2 extends JSGenEffect {
-  val IR: ListOps2Exp
-  import IR._
-
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ConstList(values) => {
-      emitValDef(sym, values.map(quote).mkString("[", ",", "]") + ";")
-    }
-    // TODO reuse JSArrays
-    case ListFlatMap(l, x, b) => {
-      stream.println("var " + quote(sym) + " = [];")
-      val i = fresh[Int]
-      stream.println("for(var " + quote(i) + " = 0 ; " + quote(i) + " < " + quote(l) + ".length ; " + quote(i) + "++){")
-      stream.println(quote(sym) + ".splice.apply(" + quote(sym) + ", [" + quote(sym) + ".length, 0].concat((function(" + quote(x) + "){")
-      emitBlock(b)
-      stream.println("return " + quote(getBlockResult(b)))
-      stream.println("})(" + quote(l) + "[" + quote(i) + "])));")
-      stream.println("}")
-    }
-    case ListMap(l, x, b) => {
-      stream.print("var " + quote(sym) + "=" + quote(l) + ".map(")
-      stream.println("function(" + quote(x) + "){")
-      emitBlock(b)
-      stream.println("return " + quote(getBlockResult(b)))
-      stream.println("});")
-    }
-    case ListConcat(l1, l2) => emitValDef(sym, quote(l1) + ".concat(" + quote(l2) + ")")
-    case _ => super.emitNode(sym, rhs)
-  }
-}
-
-trait ListOps2InScala extends ListOps2 with JSInScala {
-
-  def list_new[A : Manifest](xs: Seq[A]): List[A] = xs.toList
-
-  def list_flatMap[A : Manifest, B : Manifest](f: A => List[B])(xs: List[A]): List[B] = xs flatMap f
-
-  def list_map[A : Manifest, B : Manifest](f: A => B)(xs: List[A]): List[B] = xs map f
-
-  def list_concat[A : Manifest](xs1: List[A], xs2: List[A]): List[A] = xs1 ++ xs2
-
-  def list_mkString[A : Manifest](xs: List[A]): String = xs.mkString
-
+trait ListOpsInScala extends ListOps with JSInScala {
+  override def list_new[A : Manifest](xs: Seq[A])(implicit pos: SourceContext) = xs.toList
+  override def list_fromseq[A : Manifest](xs: Seq[A])(implicit pos: SourceContext) = xs.toList
+  override def list_flatMap[A : Manifest, B : Manifest](f: A => List[B])(xs: List[A])(implicit pos: SourceContext): List[B] = xs flatMap f
+  override def list_map[A : Manifest, B : Manifest](xs: List[A], f: A => B)(implicit pos: SourceContext): List[B] = xs map f
+  override def list_sortby[A : Manifest, B : Manifest : Ordering](l: List[A], f: A => B)(implicit pos: SourceContext) = l.sortBy(f)
+  override def list_prepend[A : Manifest](l: List[A], a: A)(implicit pos: SourceContext) = a :: l
+  override def list_toarray[A : Manifest](l: List[A])(implicit pos: SourceContext) = l.toArray
+  override def list_toseq[A : Manifest](l: List[A])(implicit pos: SourceContext) = l.toSeq
+  override def list_concat[A : Manifest](xs1: List[A], xs2: List[A])(implicit pos: SourceContext): List[A] = xs1 ++ xs2
+  override def list_cons[A : Manifest](x: A, xs: List[A])(implicit pos: SourceContext) = x :: xs
+  override def list_head[A : Manifest](xs: List[A])(implicit pos: SourceContext) = xs.head
+  override def list_tail[A : Manifest](xs: List[A])(implicit pos: SourceContext) = xs.tail
+  override def list_isEmpty[A : Manifest](xs: List[A])(implicit pos: SourceContext) = xs.isEmpty
+  override def list_mkString[A : Manifest](xs: List[A])(implicit pos: SourceContext): String = xs.mkString
 }
 
 
@@ -256,23 +136,6 @@ trait ScalaGenProxy extends ScalaGenBase with ScalaGenEffect {
     emitValDef(sym, quote(receiver) + "." + field + " = " + quote(value))
 
   case _ => super.emitNode(sym, rhs)
-  }
-
-}
-
-// --- Struct JS code generation
-
-trait JSGenStruct extends JSGenBase { this: JSGenLiteral with JSGenStruct =>
-
-  val IR: StructExp with JSLiteralExp
-  import IR._
-  
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case Struct(_, elems) =>
-      emitNode(sym, JSLiteralDef(elems.toList))
-    case Field(struct, index, _) =>
-      emitNode(sym, MemberSelect(struct, index))
-    case _ => super.emitNode(sym, rhs)
   }
 
 }

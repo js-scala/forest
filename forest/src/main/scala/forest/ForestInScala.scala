@@ -30,4 +30,4 @@ trait ForestInScala extends Forest with JSInScala {
   override def infix_ref(tree: Map[String, Node], ref: String) = tree(ref)
 }
 
-trait ForestInScalaPkg extends ForestInScala with ListOps2InScala with ModulesInScala with JSProxyInScala
+trait ForestInScalaPkg extends ForestInScala with ListOpsInScala with ModulesInScala with JSProxyInScala

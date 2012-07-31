@@ -38,7 +38,8 @@ compilation: ok
 *******************************************/
 class DynamicChildren extends ((scala.collection.immutable.List[java.lang.String])=>(scala.collection.immutable.Map[java.lang.String, scala.xml.Node])) {
 def apply(x32:scala.collection.immutable.List[java.lang.String]): scala.collection.immutable.Map[java.lang.String, scala.xml.Node] = {
-val x38 = x32.map { x33 =>
+val x38 = x32.map{
+x33 => 
 val x34 = {xml.Text(x33)}
 val x36 = <li>{x34}</li>
 x36

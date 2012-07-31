@@ -1,7 +1,7 @@
 package forest
 
 import org.scalatest._
-import forest.lms._
+import forest._
 
 class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
 
