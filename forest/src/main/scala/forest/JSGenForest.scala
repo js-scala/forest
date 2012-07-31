@@ -14,7 +14,7 @@ trait JSGenForest extends JSGen {
 
     case Tag(name, children, attrs) => {
       // Create the element
-      emitValDef(sym, s"document.createElement('$name');")
+      emitValDef(sym, s"document.createElement('$name')")
       // Add its attributes
       for ((name, value) <- attrs) {
         val v = if (value.isEmpty) {
@@ -43,7 +43,7 @@ trait JSGenForest extends JSGen {
     }
 
     case Text(content) =>
-      emitValDef(sym, "document.createTextNode(%s);".format(content.map(quote).mkString("+")))
+      emitValDef(sym, "document.createTextNode(%s)".format(content.map(quote).mkString("+")))
 
     case _ => super.emitNode(sym, node)
   }

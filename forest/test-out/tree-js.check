@@ -7,14 +7,14 @@ var x6 = document.createElement('div');
 x6.setAttribute('class', "message");
 x6.appendChild(x4);
 x6.appendChild(x3);
-var x7 = {'btn' : x3,'root' : x6}
+var x7 = {'btn' : x3,'root' : x6};
 return x7
 }
 function OneChild(x9) {
 var x10 = document.createTextNode(x9);
 var x12 = document.createElement('div');
 x12.appendChild(x10);
-var x13 = {'root' : x12}
+var x13 = {'root' : x12};
 return x13
 }
 function DynamicChildren(x15) {
@@ -28,6 +28,6 @@ var x22 = document.createElement('ul');
 for (var x25 = 0 ; x25 < x21.length ; x25++) {
 x22.appendChild(x21[x25]);
 }
-var x23 = {'root' : x22}
+var x23 = {'root' : x22};
 return x23
 }
