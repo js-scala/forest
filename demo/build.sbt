@@ -5,7 +5,7 @@ scalaVersion := Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.
 
 resolvers += ScalaToolsSnapshots
 
-libraryDependencies += "forest" %% "forest" % "0.3-SNAPSHOT"
+libraryDependencies += "js-scala" %% "forest" % "0.3-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
 

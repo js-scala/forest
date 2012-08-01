@@ -1,6 +1,6 @@
 name := "forest"
 
-organization := "forest"
+organization := "js-scala"
 
 version := "0.3-SNAPSHOT"
 
