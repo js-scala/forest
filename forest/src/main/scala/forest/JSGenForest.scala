@@ -6,8 +6,8 @@ import scala.js._
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends JSGen {
-  val IR: ForestExp with JSExp
+trait JSGenForest extends JSGenBase {
+  val IR: ForestExp
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
@@ -47,8 +47,10 @@ trait JSGenForest extends JSGen {
 
     case _ => super.emitNode(sym, node)
   }
+
+  def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], name: String, out: java.io.PrintWriter) = emitSourceAnyArity(args, body, name, out)
 }
 
-trait JSGenForestPkg extends JSGenForest with JSGenProxy with JSGenModules with JSGenStruct with JSGenListOps {
+trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenProxy with JSGenModules with JSGenStruct with JSGenListOps {
   val IR: ForestPkgExp
 }

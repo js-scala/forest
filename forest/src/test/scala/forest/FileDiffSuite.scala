@@ -6,8 +6,8 @@ import org.scalatest._
 
 class FileDiffSuite(prefix: String) { this: Suite =>
   
-  def testWithOutFile(name: String)(test: => Unit) {
-    withOutFile(prefix+name)(test)
+  def testWithOutFile(name: String)(test: java.io.PrintWriter => Unit) {
+    withOutFile(prefix+name)(test(new java.io.PrintWriter(System.out)))
     assertFileEqualsCheck(prefix+name)
   }
   

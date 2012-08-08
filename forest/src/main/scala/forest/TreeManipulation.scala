@@ -1,9 +1,8 @@
 package forest
 
-import scala.Tuple2.apply
 import scala.js.JSGenEffect
-import scala.virtualization.lms.common.EffectExp
-import scala.virtualization.lms.common.ScalaGenEffect
+import scala.virtualization.lms.common._
+import scala.xml.Node
 
 /**
  * DSL to manipulate trees.

@@ -6,7 +6,7 @@ import org.scalatest.Suite
 
 class TestJSGen extends FileDiffSuite("test-out/") with Suite {
 
-  trait Message extends ForestPkg {
+  trait Message extends ForestPkg with LiftAll {
     /**
      * {content: String}
      * div class=message
@@ -14,33 +14,34 @@ class TestJSGen extends FileDiffSuite("test-out/") with Suite {
      *   button /btn
      *     | Delete
      */
-    def message(content: Rep[String]): Rep[Tree] = {
-      val btn = tag("button")(List(text("Delete")))
-      tree(tag("div", "class"->scala.List("message"))(List(
-        text("Content: ", content),
-        btn
-      )), "btn"->btn)
+    def message(content: Rep[String]) = {
+      val b = tag("button")(List(text("Delete")))
+      val r = tag("div", "class"->scala.List("message")) (List(
+          text("Content: ", content),
+          b
+      ))
+      new Record { val root = r; val btn = b }
     }
 
-    def oneChild(s: Rep[String]): Rep[Tree] = {
-      tree(tag("div")(List(text(s))))
+    def oneChild(s: Rep[String]) = {
+      tag("div")(List(text(s)))
     }
 
-    def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {
+    def dynamicChildren(xs: Rep[List[String]]) = {
       val items = for (x <- xs) yield {
         tag("li")(List(text(x)))
       }
-      tree(tag("ul")(items))
+      tag("ul")(items)
     }
 
   }
 
-  def testJsGen = testWithOutFile("tree-js") {
+  def testJsGen = testWithOutFile("tree-js") { out =>
     val prog = new Message with ForestPkgExp { self =>
       val codegen = new JSGenForestPkg { val IR: self.type = self }
-      codegen.emitSource(self.message, "Tree", new java.io.PrintWriter(System.out))
-      codegen.emitSource(self.oneChild, "OneChild", new java.io.PrintWriter(System.out))
-      codegen.emitSource(self.dynamicChildren, "DynamicChildren", new java.io.PrintWriter(System.out))
+      codegen.emitSource(self.message, "Tree", out)
+      codegen.emitSource(self.oneChild, "OneChild", out)
+      codegen.emitSource(self.dynamicChildren, "DynamicChildren", out)
     }
   }
 

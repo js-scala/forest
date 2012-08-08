@@ -9,8 +9,8 @@ import scalax.file.Path
 class Lms {
 
   def generate(document: Document, name: String, targetDirectory: Path): String = {
-    """|def %s(%s): Rep[Tree] = {
-       |  tree(%s)
+    """|def %s(%s): Rep[Node] = {
+       |  %s
        |}
        |""".stripMargin.format(
              name,

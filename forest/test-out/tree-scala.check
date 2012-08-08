@@ -1,56 +1,49 @@
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class Tree extends ((java.lang.String)=>(scala.collection.immutable.Map[java.lang.String, scala.xml.Node])) {
-def apply(x0:java.lang.String): scala.collection.immutable.Map[java.lang.String, scala.xml.Node] = {
+class Tree extends ((java.lang.String)=>(scala.xml.Node)) {
+def apply(x0:java.lang.String): scala.xml.Node = {
 val x1 = {xml.Text("Content: " + x0)}
 val x3 = <div class={"message"}>{x1}</div>
-val x4 = Map("root"->x3) //ClassTag(Tree)
-x4
+x3
 }
 }
 /*****************************************
   End of Generated Code                  
 *******************************************/
-compilation: ok
-<div class="message">Content: Bonjour</div>
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class SeveralChildren extends ((java.lang.String)=>(scala.collection.immutable.Map[java.lang.String, scala.xml.Node])) {
-def apply(x12:java.lang.String): scala.collection.immutable.Map[java.lang.String, scala.xml.Node] = {
-val x13 = {xml.Text(x12)}
-val x15 = <strong>{x13}</strong>
-val x16 = {xml.Text("Hello ")}
-val x17 = {xml.Text("!")}
-val x19 = <div>{List(x16, x15, x17)}</div>
-val x20 = Map("greeted"->x15,"root"->x19) //ClassTag(Tree)
-x20
+class SeveralChildren extends ((java.lang.String)=>(RecordNodeNode)) {
+def apply(x5:java.lang.String): RecordNodeNode = {
+val x6 = {xml.Text(x5)}
+val x8 = <strong>{x6}</strong>
+val x10 = {xml.Text("Hello ")}
+val x11 = {xml.Text("!")}
+val x13 = <div>{List(x10, x8, x11)}</div>
+val x9 = RecordNodeNode(root = x13, greeted = x8)
+x9
 }
 }
 /*****************************************
   End of Generated Code                  
 *******************************************/
-compilation: ok
-<div>Hello <strong>World</strong>!</div>
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class DynamicChildren extends ((scala.collection.immutable.List[java.lang.String])=>(scala.collection.immutable.Map[java.lang.String, scala.xml.Node])) {
-def apply(x32:scala.collection.immutable.List[java.lang.String]): scala.collection.immutable.Map[java.lang.String, scala.xml.Node] = {
-val x38 = x32.map{
-x33 => 
-val x34 = {xml.Text(x33)}
-val x36 = <li>{x34}</li>
-x36
+class DynamicChildren extends ((scala.collection.immutable.List[java.lang.String])=>(scala.xml.Node)) {
+def apply(x15:scala.collection.immutable.List[java.lang.String]): scala.xml.Node = {
+val x21 = x15.map{
+x16 => 
+val x17 = {xml.Text(x16)}
+val x19 = <li>{x17}</li>
+x19
 }
-val x39 = <ul>{x38}</ul>
-val x40 = Map("root"->x39) //ClassTag(Tree)
-x40
+val x22 = <ul>{x21}</ul>
+x22
 }
 }
 /*****************************************
   End of Generated Code                  
 *******************************************/
-compilation: ok
-<ul><li>foo</li><li>bar</li><li>baz</li></ul>
+case class RecordNodeNode(root: scala.xml.Node, greeted: scala.xml.Node)

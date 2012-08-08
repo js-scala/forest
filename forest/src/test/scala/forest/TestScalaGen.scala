@@ -1,53 +1,57 @@
 package forest
 
 import forest._
-import scala.virtualization.lms.common.CompileScala
+import scala.virtualization.lms.common._
 import org.scalatest.Suite
 import java.io.PrintWriter
 
 class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
-  trait Message extends ForestPkg {
+  trait Message extends ForestPkg with LiftAll {
 
-    def oneChild(content: Rep[String]): Rep[Tree] = {
-      tree(tag("div", "class"->scala.List("message"))(List(text("Content: ", content))))
+    def oneChild(content: Rep[String]) = {
+      tag("div", "class"->scala.List("message"))(List(text("Content: ", content)))
     }
 
-    def severalChildren(s: Rep[String]): Rep[Tree] = {
-      val greeted = tag("strong")(List(text(s)))
-      tree(tag("div")(List(
-        text("Hello "),
-        greeted,
-        text("!")
-      )), "greeted"->greeted)
+    def severalChildren(s: Rep[String]) = {
+      val g = tag("strong")(List(text(s)))
+      new Record {
+        val root = tag("div")(List(
+          text("Hello "),
+          g,
+          text("!")
+        ))
+        val greeted = g
+      }
     }
 
-    def dynamicChildren(xs: Rep[List[String]]): Rep[Tree] = {
+    def dynamicChildren(xs: Rep[List[String]]) = {
       val items = for (x <- xs) yield {
         tag("li")(List(text(x)))
       }
-      tree(tag("ul")(items))
+      tag("ul")(items)
     }
 
   }
 
-  def testXmlGen = testWithOutFile("tree-scala") {
+  def testXmlGen = testWithOutFile("tree-scala") { out =>
     val prog = new Message with ForestPkgExp with CompileScala { self =>
 
       override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
 
-      codegen.emitSource(self.oneChild, "Tree", new PrintWriter(System.out))
-      val messageCompiled = compile(self.oneChild)
-      println(messageCompiled("Bonjour")("root"))
+      codegen.emitSource(self.oneChild, "Tree", out)
+      // val messageCompiled = compile(self.oneChild)
+      // println(messageCompiled("Bonjour"))
 
-      codegen.emitSource(self.severalChildren, "SeveralChildren", new PrintWriter(System.out))
-      val severalChildrenCompiled = compile(self.severalChildren)
-      println(severalChildrenCompiled("World")("root"))
+      codegen.emitSource(self.severalChildren, "SeveralChildren", out)
+      // val severalChildrenCompiled = compile(self.severalChildren)
+      // println(severalChildrenCompiled("World"))
 
-      codegen.emitSource(self.dynamicChildren, "DynamicChildren", new PrintWriter(System.out))
-      val dynamicChildrenCompiled = compile(self.dynamicChildren)
-      println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz"))("root"))
+      codegen.emitSource(self.dynamicChildren, "DynamicChildren", out)
+      // val dynamicChildrenCompiled = compile(self.dynamicChildren)
+      // println(dynamicChildrenCompiled(scala.List("foo", "bar", "baz")))
 
+      codegen.emitDataStructures(out)
     }
   }
 

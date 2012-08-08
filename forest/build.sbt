@@ -15,6 +15,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "EPFL" %% "js-scala" % "0.2-SNAPSHOT",
+  "EPFL" %% "lms" % "0.3-SNAPSHOT",
   "scalate" %% "scuery" % "4.0.0-SNAPSHOT",
   "org.scalatest" % "scalatest_2.10.0-virtualized-SNAPSHOT" % "1.6.1-SNAPSHOT" % "test"
 )
