@@ -14,7 +14,7 @@ object Person {
        |    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
        |    <script src="person.js"></script>
        |  </body>
-       |</html>""".stripMargin.format(views.Form.person(p)("root"))
+       |</html>""".stripMargin.format(views.Form.person(p))
 
 }
 
