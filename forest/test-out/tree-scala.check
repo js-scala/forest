@@ -3,9 +3,10 @@
 *******************************************/
 class Tree extends ((java.lang.String)=>(scala.xml.Node)) {
 def apply(x0:java.lang.String): scala.xml.Node = {
-val x1 = {xml.Text("Content: " + x0)}
-val x3 = <div class={"message"}>{x1}</div>
-x3
+val x1 = "Content: "+x0
+val x2 = {xml.Text(x1)}
+val x4 = <div class={"message"}>{x2}</div>
+x4
 }
 }
 /*****************************************
@@ -15,14 +16,14 @@ x3
   Emitting Generated Code                  
 *******************************************/
 class SeveralChildren extends ((java.lang.String)=>(RecordNodeNode)) {
-def apply(x5:java.lang.String): RecordNodeNode = {
-val x6 = {xml.Text(x5)}
-val x8 = <strong>{x6}</strong>
-val x10 = {xml.Text("Hello ")}
-val x11 = {xml.Text("!")}
-val x13 = <div>{List(x10, x8, x11)}</div>
-val x9 = RecordNodeNode(root = x13, greeted = x8)
-x9
+def apply(x6:java.lang.String): RecordNodeNode = {
+val x7 = {xml.Text(x6)}
+val x9 = <strong>{x7}</strong>
+val x11 = {xml.Text("Hello ")}
+val x12 = {xml.Text("!")}
+val x14 = <div>{List(x11, x9, x12)}</div>
+val x10 = RecordNodeNode(root = x14, greeted = x9)
+x10
 }
 }
 /*****************************************
@@ -32,15 +33,15 @@ x9
   Emitting Generated Code                  
 *******************************************/
 class DynamicChildren extends ((scala.collection.immutable.List[java.lang.String])=>(scala.xml.Node)) {
-def apply(x15:scala.collection.immutable.List[java.lang.String]): scala.xml.Node = {
-val x21 = x15.map{
-x16 => 
-val x17 = {xml.Text(x16)}
-val x19 = <li>{x17}</li>
-x19
+def apply(x16:scala.collection.immutable.List[java.lang.String]): scala.xml.Node = {
+val x22 = x16.map{
+x17 => 
+val x18 = {xml.Text(x17)}
+val x20 = <li>{x18}</li>
+x20
 }
-val x22 = <ul>{x21}</ul>
-x22
+val x23 = <ul>{x22}</ul>
+x23
 }
 }
 /*****************************************

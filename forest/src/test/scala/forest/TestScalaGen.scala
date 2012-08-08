@@ -10,8 +10,8 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   trait Message extends ForestPkg with LiftAll {
 
     def oneChild(content: Rep[String]) = {
-      tag("div", "class"->scala.List("message"))(
-        text("Content: ", content))
+      tag("div", "class"->"message")(
+        text("Content: " + content))
     }
 
     def severalChildren(s: Rep[String]) = {

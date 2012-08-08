@@ -2,30 +2,31 @@ function Tree(x0) {
 var x1 = document.createTextNode("Delete");
 var x3 = document.createElement('button');
 x3.appendChild(x1);
-var x4 = document.createTextNode("Content: "+x0);
-var x6 = document.createElement('div');
-x6.setAttribute('class', "message");
-x6.appendChild(x4);
-x6.appendChild(x3);
-var x7 = {'root' : x6,'btn' : x3};
-return x7
+var x4 = "Content: "+x0;
+var x5 = document.createTextNode(x4);
+var x7 = document.createElement('div');
+x7.setAttribute('class', "message");
+x7.appendChild(x5);
+x7.appendChild(x3);
+var x8 = {'root' : x7,'btn' : x3};
+return x8
 }
-function OneChild(x9) {
-var x10 = document.createTextNode(x9);
-var x12 = document.createElement('div');
-x12.appendChild(x10);
-return x12
+function OneChild(x10) {
+var x11 = document.createTextNode(x10);
+var x13 = document.createElement('div');
+x13.appendChild(x11);
+return x13
 }
-function DynamicChildren(x14) {
-var x20=x14.map(function(x15){
-var x16 = document.createTextNode(x15);
-var x18 = document.createElement('li');
-x18.appendChild(x16);
-return x18
+function DynamicChildren(x15) {
+var x21=x15.map(function(x16){
+var x17 = document.createTextNode(x16);
+var x19 = document.createElement('li');
+x19.appendChild(x17);
+return x19
 });
-var x21 = document.createElement('ul');
-for (var x23 = 0 ; x23 < x20.length ; x23++) {
-x21.appendChild(x20[x23]);
+var x22 = document.createElement('ul');
+for (var x24 = 0 ; x24 < x21.length ; x24++) {
+x22.appendChild(x21[x24]);
 }
-return x21
+return x22
 }

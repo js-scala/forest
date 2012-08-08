@@ -12,18 +12,7 @@ trait ScalaGenForest extends ScalaGenEffect {
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
     case Tag(name, children, attrs) => {
-      val attrsFormatted = (for ((name, value) <- attrs) yield {
-        // value is a list of string literals or symbols
-        if (value.isEmpty) {
-          " " + name + "='" + name + "'"
-        } else {
-          val v = value.map {
-            case Const(lit) => "\"" + lit.toString.replace("\"", "\\\"") + "\""
-            case s: Sym[_] => quote(s)
-          }.mkString(" + ")
-          " " + name + "={" + v + "}"
-        }
-      }).mkString(" ")
+      val attrsFormatted = (for ((name, value) <- attrs) yield " " + name + "={" + quote(value) + "}").mkString(" ")
       children match {
         case Left(children) => {
           if (children.isEmpty) {
@@ -43,7 +32,7 @@ trait ScalaGenForest extends ScalaGenEffect {
     }
 
     case Text(content) => {
-      emitValDef(sym, "{xml.Text(%s)}".format(content.map(quote).mkString(" + ")))
+      emitValDef(sym, "{xml.Text(%s)}".format(quote(content)))
     }
 
     case _ => super.emitNode(sym, node)
@@ -52,6 +41,6 @@ trait ScalaGenForest extends ScalaGenEffect {
 
 }
 
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenIfThenElse with ScalaGenFunctions with ScalaGenProxy with ScalaGenModules with ScalaGenListOps with ScalaGenStruct {
+trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenIfThenElse with ScalaGenListOps with ScalaGenStringOps with ScalaGenProxy with ScalaGenModules with ScalaGenStruct {
   val IR: ForestPkgExp
 }

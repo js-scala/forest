@@ -17,8 +17,8 @@ class TestJSGen extends FileDiffSuite("test-out/") with Suite {
     def message(content: Rep[String]) = {
       val b = tag("button")(
                 text("Delete"))
-      val r = tag("div", "class"->scala.List("message")) (
-          text("Content: ", content),
+      val r = tag("div", "class"->"message") (
+          text("Content: " + content),
           b
       )
       new Record { val root = r; val btn = b }

@@ -15,24 +15,25 @@ trait Forest extends Base {
    * @param children Nested tags
    * @param attrs Tag attributes
    */
-  def forest_tag(name: String, attrs: Map[String, List[Rep[Any]]], children: Rep[List[Node]]): Rep[Node]
+  // FIXME attrs: Map[String, Option[Rep[String]] to handle attributes with no value
+  def forest_tag(name: String, attrs: Map[String, Rep[String]], children: Rep[List[Node]]): Rep[Node]
 
   /**
    * Creates a text node (e.g. `foo`)
    * @param xs Elements of the text node. The type of `xs` is `List` to allow to mix string literal (e.g. `"foo"`) and symbols (e.g. `foo.bar`)
    */
-  def forest_text(xs: List[Rep[Any]]): Rep[Node]
+  def forest_text(xs: Rep[String]): Rep[Node]
 
 }
 
 /**
  * Sweeter syntax
  * {{{
- *   tag("div", "class"->List("article"), "data-id"->List(42))(
+ *   tag("div", "class"->"article", "data-id"->article.id.toString)(
  *     tag("span")(
- *       text("Name: ", article.name)),
+ *       text("Name: " + article.name)),
  *     tag("span")(
- *       text("Description: ", article.description))
+ *       text("Description: " + article.description))
  *   )
  *   
  *   tag2("ul")(
@@ -41,14 +42,14 @@ trait Forest extends Base {
  */
 trait ForestDSL extends Forest { this: ListOps =>
 
-  def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[Node]*) =
+  def tag(name: String, attrs: (String, Rep[String])*)(children: Rep[Node]*) =
     forest_tag(name, attrs.toMap, list_new(children))
 
-  def tag2(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
+  def tag2(name: String, attrs: (String, Rep[String])*)(children: Rep[List[Node]]) =
     forest_tag(name, attrs.toMap, children)
 
-  def text(xs: Rep[Any]*) =
-    forest_text(xs.toList)
+  def text(s: Rep[String]) =
+    forest_text(s)
 
 }
 
@@ -57,7 +58,7 @@ trait ForestDSL extends Forest { this: ListOps =>
  */
 trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp =>
 
-  override def forest_tag(name: String, attrs: Map[String, List[Exp[Any]]], children: Exp[List[Node]]) = {
+  override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]]) = {
     reflectEffect {
       children match {
         case Def(ListNew(children)) =>
@@ -68,12 +69,12 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp 
     }
   }
 
-  override def forest_text(content: List[Exp[Any]]) = reflectEffect(Text(content))
+  override def forest_text(content: Exp[String]) = reflectEffect(Text(content))
 
 
-  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, List[Exp[Any]]]) extends Def[Node]
+  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, Exp[String]]) extends Def[Node]
 
-  case class Text(content: List[Exp[Any]]) extends Def[Node]
+  case class Text(content: Exp[String]) extends Def[Node]
 
 }
 
@@ -81,5 +82,5 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp 
 // --- Convenient packages
 
 // TODO do not include JS. Use common LMS traits.
-trait ForestPkg extends Forest with ForestDSL with IfThenElse with ListOps with Modules with JSProxyBase with Structs
-trait ForestPkgExp extends ForestExp with IfThenElseExp with FunctionsExp with ListOpsExp with ListOpsExpOpt with StructExp with ModulesExp with JSProxyExp
+trait ForestPkg extends Forest with ForestDSL with IfThenElse with ListOps with StringOps with Modules with JSProxyBase with Structs
+trait ForestPkgExp extends ForestExp with IfThenElseExp with ListOpsExp with ListOpsExpOpt with StringOpsExp with StructExp with ModulesExp with JSProxyExp

@@ -17,12 +17,7 @@ trait JSGenForest extends JSGenBase {
       emitValDef(sym, s"document.createElement('$name')")
       // Add its attributes
       for ((name, value) <- attrs) {
-        val v = if (value.isEmpty) {
-          "'$name'" // Attribute with no value: give it an arbitrary value (because Element#setAttribute does not support attributes with no value)
-        } else {
-          value.map(quote).mkString("+")
-        }
-        stream.println(s"${quote(sym)}.setAttribute('$name', $v);")
+        stream.println(s"${quote(sym)}.setAttribute('$name', ${quote(value)});")
       }
       // Append its children nodes
       children match {
@@ -43,7 +38,7 @@ trait JSGenForest extends JSGenBase {
     }
 
     case Text(content) =>
-      emitValDef(sym, "document.createTextNode(%s)".format(content.map(quote).mkString("+")))
+      emitValDef(sym, "document.createTextNode(%s)".format(quote(content)))
 
     case _ => super.emitNode(sym, node)
   }
@@ -51,6 +46,6 @@ trait JSGenForest extends JSGenBase {
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], name: String, out: java.io.PrintWriter) = emitSourceAnyArity(args, body, name, out)
 }
 
-trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenProxy with JSGenModules with JSGenStruct with JSGenListOps {
+trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenListOps with JSGenStringOps with JSGenProxy with JSGenModules with JSGenStruct {
   val IR: ForestPkgExp
 }

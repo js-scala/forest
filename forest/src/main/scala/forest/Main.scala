@@ -9,7 +9,6 @@ import scala.virtualization.lms.common._
 
 // TODO routes & i18n.
 trait Articles extends ForestPkg with LiftAll {
-  import collection.immutable.{List => SList}
 
   type Article = Record { val name: String; val price: Double; val highlighted: Boolean }
   def Article(n: Rep[String], p: Rep[Double], h: Rep[Boolean]): Rep[Article] =
@@ -25,11 +24,11 @@ trait Articles extends ForestPkg with LiftAll {
      *   </dl>
      */
     def show(article: Rep[Article]) = {
-      tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(
+      tag("dl", "class"->(if (article.highlighted) "highlighted" else ""))(
         tag("dt")(text("Name")),
         tag("dd")(text(article.name)),
         tag("dt")(text("Price")),
-        tag("dd")(text(article.price, " Euros"))
+        tag("dd")(text(article.price + " Euros"))
       )
     }
 
