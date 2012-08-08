@@ -9,7 +9,7 @@ import scalax.file.Path
 class Lms {
 
   def generate(document: Document, name: String, targetDirectory: Path): String = {
-    """|def %s(%s): Rep[Node] = {
+    """|def %s(%s): Rep[scala.xml.Node] = {
        |  %s
        |}
        |""".stripMargin.format(
@@ -28,7 +28,7 @@ class Lms {
       case If(cond, thenPart, elsePart) => {
         "if (%s) %s else %s".format(q(cond), q(thenPart), q(elsePart))
       }
-      case For(it, seq, body) => "%s.flatMap[Node]{ %s => %s }".format(q(seq), it, q(body))
+      case For(it, seq, body) => "%s.flatMap[scala.xml.Node]{ %s => %s }".format(q(seq), it, q(body))
       case Call(callee, args) => "%s(%s)".format(callee, args.map(arg => q(arg)).mkString(", "))
     }
   }
@@ -63,7 +63,7 @@ class Lms {
   object quoteNodes extends Quote[List[Node]] {
     override def quote(nodes: List[Node]) = {
       def format(nodes: List[Node], isOpen: Boolean): String = nodes match {
-        case Nil            => if (isOpen) ")" else "List[Node]()"
+        case Nil            => if (isOpen) ")" else "List[scala.xml.Node]()"
         case (f: For) :: ns => (if (isOpen) ") ++ " else "") + q(f) + " ++ " + format(ns, false) // TODO remove this crap code
         case n :: ns        => (if (isOpen) ", " else "List(") + q(n) + format(ns, true)
       }
