@@ -24,7 +24,7 @@ class Lms {
       case Tag(name, children, attrs, _) => {
         "tag2(%s%s)(%s)".format(q(name), q(attrs)(quoteAttrs), q(children)(quoteNodes))
       }
-      case Text(content) => "text(%s)".format(content.map(c => q(c)).mkString(", "))
+      case Text(content) => "text(%s)".format(content.map(c => q(c)).mkString(" + "))
       case If(cond, thenPart, elsePart) => {
         "if (%s) %s else %s".format(q(cond), q(thenPart), q(elsePart))
       }
@@ -54,8 +54,8 @@ class Lms {
         ""
       } else {
         ", %s"
-            .format((for ((k, vs) <- attrs) yield "(%s, %s)"
-                .format(q(k), "SList(%s)".format((for (v <- vs) yield q(v)).mkString(", ")))).mkString(", "))
+            .format((for ((k, vs) <- attrs) yield "(%s, (%s))"
+                .format(q(k), (for (v <- vs) yield q(v)).mkString(" + "))).mkString(", "))
       }
     }
   }

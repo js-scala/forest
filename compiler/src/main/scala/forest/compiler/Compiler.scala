@@ -36,7 +36,6 @@ class Compiler {
            |%s
            |
            |trait %s extends ForestPkg %s{
-           |  import collection.immutable.{List => SList}
            |  trait %s {
            |    %s
            |  }
