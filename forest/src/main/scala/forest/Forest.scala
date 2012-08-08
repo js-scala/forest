@@ -28,20 +28,23 @@ trait Forest extends Base {
 /**
  * Sweeter syntax
  * {{{
- *   tag2("div", "class"->List("article"), "data-id"->List(42))(
- *     tag("span")(text("Name: ", article.name)),
- *     tag("span")(text("Description: ", article.description))
+ *   tag("div", "class"->List("article"), "data-id"->List(42))(
+ *     tag("span")(
+ *       text("Name: ", article.name)),
+ *     tag("span")(
+ *       text("Description: ", article.description))
  *   )
  *   
- *   tag("ul") (for (x <- xs) yield item(x))
+ *   tag2("ul")(
+ *     for (x <- xs) yield item(x))
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps =>
 
-  def tag2(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[Node]*) =
+  def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[Node]*) =
     forest_tag(name, attrs.toMap, list_new(children))
 
-  def tag(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
+  def tag2(name: String, attrs: (String, List[Rep[Any]])*)(children: Rep[List[Node]]) =
     forest_tag(name, attrs.toMap, children)
 
   def text(xs: Rep[Any]*) =

@@ -25,12 +25,12 @@ trait Articles extends ForestPkg with LiftAll {
      *   </dl>
      */
     def show(article: Rep[Article]) = {
-      tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(List(
-        tag("dt")(List(text("Name"))),
-        tag("dd")(List(text(article.name))),
-        tag("dt")(List(text("Price"))),
-        tag("dd")(List(text(article.price, " Euros")))
-      ))
+      tag("dl", "class"->SList(if (article.highlighted) "highlighted" else ""))(
+        tag("dt")(text("Name")),
+        tag("dd")(text(article.name)),
+        tag("dt")(text("Price")),
+        tag("dd")(text(article.price, " Euros"))
+      )
     }
 
     /**
@@ -42,9 +42,9 @@ trait Articles extends ForestPkg with LiftAll {
      *   </ul>
      */
     def list(articles: Rep[List[Article]]) = {
-        val root = tag("ul")(
+        val root = tag2("ul")(
           for (article <- articles) yield {
-            tag("li")(List(show(article)))
+            tag("li")(show(article))
           }
         )
         root
