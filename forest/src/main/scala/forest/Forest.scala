@@ -46,7 +46,7 @@ trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
   def tag(name: String, attrs: (String, Rep[Any])*)(children: Rep[Node]*) =
     forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, list_new(children))
 
-  def tag2(name: String, attrs: (String, Rep[Any])*)(children: Rep[List[Node]]) =
+  def tag2(name: String, attrs: (String, Rep[Any])*)(children: Rep[List[Node]] = unit(Nil)) =
     forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, children)
 
   def text(s: Rep[String]) =
