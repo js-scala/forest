@@ -10,17 +10,15 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   trait Message extends ForestPkg with LiftAll {
 
     def oneChild(content: Rep[String]) = {
-      tag("div", "class"->"message", "data-id"->42)(
+      tag('div, 'class->'message, "data-id"->42)(
         text("Content: " + content))
     }
 
     def severalChildren(s: Rep[String]) = {
-      val g = tag("strong")(text(s))
+      val g = tag('strong)(text(s))
       new Record {
-        val root = tag("div")(
-          text("Hello "),
-          g,
-          text("!")
+        val root = tag('div)(
+          text("Hello "), g, text("!")
         )
         val greeted = g
       }
@@ -28,9 +26,9 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
     def dynamicChildren(xs: Rep[List[String]]) = {
       val items = for (x <- xs) yield {
-        tag("li")(text(x))
+        tag('li)(text(x))
       }
-      tag2("ul")(items)
+      tag2('ul)(items)
     }
 
   }

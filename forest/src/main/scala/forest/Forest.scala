@@ -29,29 +29,36 @@ trait Forest extends Base {
 /**
  * Sweeter syntax
  * {{{
- *   tag("div", "class"->"article", "data-id"->article.id.toString)(
- *     tag("span")(
+ *   tag('div, 'class->'article, "data-id"->article.id)(
+ *     tag('span)(
  *       text("Name: " + article.name)),
- *     tag("span")(
+ *     tag('span)(
  *       text("Description: " + article.description))
  *   )
  *   
- *   tag2("ul")(
+ *   tag2('ul)(
  *     for (x <- xs) yield item(x))
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
 
-  // Symbols or Strings for identifiers (tag names or attribute names)
-  def tag(name: String, attrs: (String, Rep[Any])*)(children: Rep[Node]*) =
-    forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, list_new(children))
+  // TODO replace “tag” with “el”
+  def tag(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*) =
+    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, list_new(children))
 
-  def tag2(name: String, attrs: (String, Rep[Any])*)(children: Rep[List[Node]] = unit(Nil)) =
-    forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, children)
+  def tag2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]] = unit(Nil)) =
+    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, children)
 
+  // TODO provide a txt"Hello $user!" equivalent to text("Hello " + user + "!")
+  // TODO replace with txt("foo")
   def text(s: Rep[String]) =
     forest_text(s)
 
+  case class StrValue(value: String)
+  implicit def stringToStringValue(s: String): StrValue = StrValue(s)
+  implicit def symbolToStringValue(s: Symbol): StrValue = StrValue(s.name)
+  implicit def symbolToRepString(s: Symbol): Rep[String] = unit(s.name) // To be able to write "class"->'bar
+  implicit def tupleWithStringValue[A <% StrValue, B <% Rep[_]](t: (A, B)): (StrValue, Rep[_]) = (t._1, t._2)
 }
 
 /**
