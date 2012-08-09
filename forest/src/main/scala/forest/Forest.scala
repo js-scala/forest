@@ -40,13 +40,14 @@ trait Forest extends Base {
  *     for (x <- xs) yield item(x))
  * }}}
  */
-trait ForestDSL extends Forest { this: ListOps =>
+trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
 
-  def tag(name: String, attrs: (String, Rep[String])*)(children: Rep[Node]*) =
-    forest_tag(name, attrs.toMap, list_new(children))
+  // Symbols or Strings for identifiers (tag names or attribute names)
+  def tag(name: String, attrs: (String, Rep[Any])*)(children: Rep[Node]*) =
+    forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, list_new(children))
 
-  def tag2(name: String, attrs: (String, Rep[String])*)(children: Rep[List[Node]]) =
-    forest_tag(name, attrs.toMap, children)
+  def tag2(name: String, attrs: (String, Rep[Any])*)(children: Rep[List[Node]]) =
+    forest_tag(name, attrs.map({ case (n, v) => (n, v.toString()) }).toMap, children)
 
   def text(s: Rep[String]) =
     forest_text(s)
@@ -82,5 +83,5 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp 
 // --- Convenient packages
 
 // TODO do not include JS. Use common LMS traits.
-trait ForestPkg extends Forest with ForestDSL with IfThenElse with ListOps with StringOps with Modules with JSProxyBase with Structs
-trait ForestPkgExp extends ForestExp with IfThenElseExp with ListOpsExp with ListOpsExpOpt with StringOpsExp with StructExp with ModulesExp with JSProxyExp
+trait ForestPkg extends Forest with ForestDSL with IfThenElse with ListOps with StringOps with ObjectOps with Modules with JSProxyBase with Structs
+trait ForestPkgExp extends ForestExp with IfThenElseExp with ListOpsExp with ListOpsExpOpt with StringOpsExp with ObjectOpsExp with ObjectOpsExpOpt with StructExp with ModulesExp with JSProxyExp

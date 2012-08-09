@@ -46,6 +46,6 @@ trait JSGenForest extends JSGenBase {
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], name: String, out: java.io.PrintWriter) = emitSourceAnyArity(args, body, name, out)
 }
 
-trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenListOps with JSGenStringOps with JSGenProxy with JSGenModules with JSGenStruct {
+trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenListOps with JSGenStringOps with JSGenObjectOps with JSGenProxy with JSGenModules with JSGenStruct {
   val IR: ForestPkgExp
 }
