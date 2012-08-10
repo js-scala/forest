@@ -7,7 +7,7 @@ import java.io.PrintWriter
 
 class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
-  trait Message extends ForestPkg with LiftAll {
+  trait Message extends ForestPkg with StringOps with Structs with LiftAll {
 
     def oneChild(content: Rep[String]) = {
       tag('div, 'class->'message, "data-id"->42)(
@@ -34,9 +34,9 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testXmlGen = testWithOutFile("tree-scala") { out =>
-    val prog = new Message with ForestPkgExp with CompileScala { self =>
+    val prog = new Message with ForestPkgExp with StringOpsExp with StructExp with CompileScala { self =>
 
-      override val codegen = new ScalaGenForestPkg { val IR: self.type = self }
+      override val codegen = new ScalaGenForestPkg with ScalaGenStringOps with ScalaGenStruct { val IR: self.type = self }
 
       codegen.emitSource(self.oneChild, "Tree", out)
       // val messageCompiled = compile(self.oneChild)

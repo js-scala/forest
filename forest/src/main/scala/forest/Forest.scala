@@ -64,7 +64,7 @@ trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp =>
+trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
 
   override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]]) = {
     reflectEffect {
@@ -90,5 +90,5 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp with StructExp 
 // --- Convenient packages
 
 // TODO do not include JS. Use common LMS traits.
-trait ForestPkg extends Forest with ForestDSL with IfThenElse with ListOps with StringOps with ObjectOps with Modules with JSProxyBase with Structs
-trait ForestPkgExp extends ForestExp with IfThenElseExp with ListOpsExp with ListOpsExpOpt with StringOpsExp with ObjectOpsExp with ObjectOpsExpOpt with StructExp with ModulesExp with JSProxyExp
+trait ForestPkg extends Forest with ForestDSL with ListOps with ObjectOps
+trait ForestPkgExp extends ForestExp with ListOpsExp with ListOpsExpOpt with ObjectOpsExp with ObjectOpsExpOpt

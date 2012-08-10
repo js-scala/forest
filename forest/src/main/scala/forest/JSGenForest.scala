@@ -6,7 +6,7 @@ import scala.js._
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends JSGenBase with QuoteGen {
+trait JSGenForest extends JSGenEffect with QuoteGen {
   val IR: ForestExp
   import IR._
 
@@ -46,6 +46,6 @@ trait JSGenForest extends JSGenBase with QuoteGen {
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], name: String, out: java.io.PrintWriter) = emitSourceAnyArity(args, body, name, out)
 }
 
-trait JSGenForestPkg extends JSGenEffect with JSGenForest with JSGenIfThenElse with JSGenListOps with JSGenStringOps with JSGenObjectOps with JSGenProxy with JSGenModules with JSGenStruct {
+trait JSGenForestPkg extends JSGenForest with JSGenListOps with JSGenObjectOps {
   val IR: ForestPkgExp
 }
