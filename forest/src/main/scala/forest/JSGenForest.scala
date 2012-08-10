@@ -6,7 +6,7 @@ import scala.js._
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends JSGenBase {
+trait JSGenForest extends JSGenBase with QuoteGen {
   val IR: ForestExp
   import IR._
 
@@ -14,10 +14,10 @@ trait JSGenForest extends JSGenBase {
 
     case Tag(name, children, attrs) => {
       // Create the element
-      emitValDef(sym, s"document.createElement('$name')")
+      emitValDef(sym, q"document.createElement('$name')")
       // Add its attributes
       for ((name, value) <- attrs) {
-        stream.println(s"${quote(sym)}.setAttribute('$name', ${quote(value)});")
+        stream.println(s"%s.setAttribute('$name', %s);".format(quote(sym), quote(value)))
       }
       // Append its children nodes
       children match {
@@ -38,7 +38,7 @@ trait JSGenForest extends JSGenBase {
     }
 
     case Text(content) =>
-      emitValDef(sym, "document.createTextNode(%s)".format(quote(content)))
+      emitValDef(sym, q"document.createTextNode($content)")
 
     case _ => super.emitNode(sym, node)
   }
