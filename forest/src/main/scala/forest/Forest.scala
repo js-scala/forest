@@ -16,7 +16,7 @@ trait Forest extends Base {
    * @param attrs Tag attributes
    */
   // FIXME attrs: Map[String, Option[Rep[String]] to handle attributes with no value
-  def forest_tag(name: String, attrs: Map[String, Rep[String]], children: Rep[List[Node]]): Rep[Node]
+  def forest_tag(name: String, attrs: Map[String, Rep[String]], children: Rep[List[Node]], xmlns: String): Rep[Node]
 
   /**
    * Creates a text node (e.g. `foo`)
@@ -43,16 +43,35 @@ trait Forest extends Base {
 trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
 
   // TODO replace “tag” with “el”
-  def tag(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*) =
-    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, list_new(children))
+  def tag(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*)(implicit ns: NS) =
+    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, list_new(children), ns.value)
 
-  def tag2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]]) =
-    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, children)
+  def tag2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]])(implicit ns: NS) =
+    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, children, ns.value)
 
   // TODO provide a txt"Hello $user!" equivalent to text("Hello " + user + "!")
   // TODO replace with txt("foo")
   def text(s: Rep[String]) =
     forest_text(s)
+
+  /**
+   * {{{
+   *   tag('div)(
+   *     withNamespace(NS.SVG) { implicit ns =>
+   *       tag('svg)(
+   *         tag('defs)(…),
+   *         tag('g)(…))
+   *     })
+   * }}}
+   */
+  def withNamespace(ns: NS)(f: NS => Rep[Node]): Rep[Node] = f(ns)
+
+  case class NS(value: String)
+  object NS {
+    implicit val HTML = NS("http://www.w3.org/1999/xhtml")
+    val SVG = NS("http://www.w3.org/2000/svg")
+    val MATHML = NS("http://www.w3.org/1998/Math/MathML")
+  }
 
   case class StrValue(value: String)
   implicit def stringToStringValue(s: String): StrValue = StrValue(s)
@@ -66,13 +85,13 @@ trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
  */
 trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
 
-  override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]]) = {
+  override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]], xmlns: String) = {
     reflectEffect {
       children match {
         case Def(ListNew(children)) =>
-          Tag(name, Left(children.toList), attrs)
+          Tag(name, xmlns, Left(children.toList), attrs)
         case _ =>
-          Tag(name, Right(children), attrs)
+          Tag(name, xmlns, Right(children), attrs)
       }
     }
   }
@@ -80,7 +99,7 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
   override def forest_text(content: Exp[String]) = reflectEffect(Text(content))
 
 
-  case class Tag(name: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, Exp[String]]) extends Def[Node]
+  case class Tag(name: String, xmlns: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, Exp[String]]) extends Def[Node]
 
   case class Text(content: Exp[String]) extends Def[Node]
 

@@ -12,9 +12,9 @@ trait JSGenForest extends JSGenEffect with QuoteGen {
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
 
-    case Tag(name, children, attrs) => {
+    case Tag(name, xmlns, children, attrs) => {
       // Create the element
-      emitValDef(sym, q"document.createElement('$name')")
+      emitValDef(sym, "document.createElementNS('" + xmlns + "', '" + name + "')")
       // Add its attributes
       for ((name, value) <- attrs) {
         stream.println(s"%s.setAttribute('$name', %s);".format(quote(sym), quote(value)))

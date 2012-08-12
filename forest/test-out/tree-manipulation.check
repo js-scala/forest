@@ -21,7 +21,7 @@ function update(x11) {
 var x13 = x11
 var x14 = $(x13).find("div");
 var x15 = document.createTextNode("foo");
-var x17 = document.createElement('span');
+var x17 = document.createElementNS('http://www.w3.org/1999/xhtml', 'span');
 x17.appendChild(x15);
 var x18 = x14.append(x17);
 var x20 = x18;

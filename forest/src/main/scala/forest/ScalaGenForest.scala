@@ -11,7 +11,7 @@ trait ScalaGenForest extends ScalaGenEffect {
   import IR._
 
   override def emitNode(sym: Sym[Any], node: Def[Any]): Unit = node match {
-    case Tag(name, children, attrs) => {
+    case Tag(name, _, children, attrs) => {
       val attrsFormatted = (for ((name, value) <- attrs) yield " " + name + "={" + quote(value) + "}").mkString(" ")
       children match {
         case Left(children) => {

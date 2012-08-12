@@ -1,10 +1,10 @@
 function Tree(x0) {
 var x1 = document.createTextNode("Delete");
-var x3 = document.createElement('button');
+var x3 = document.createElementNS('http://www.w3.org/1999/xhtml', 'button');
 x3.appendChild(x1);
 var x4 = "Content: "+x0;
 var x5 = document.createTextNode(x4);
-var x7 = document.createElement('div');
+var x7 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
 x7.setAttribute('class', "message");
 x7.appendChild(x5);
 x7.appendChild(x3);
@@ -13,18 +13,18 @@ return x8
 }
 function OneChild(x10) {
 var x11 = document.createTextNode(x10);
-var x13 = document.createElement('div');
+var x13 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
 x13.appendChild(x11);
 return x13
 }
 function DynamicChildren(x15) {
 var x21=x15.map(function(x16){
 var x17 = document.createTextNode(x16);
-var x19 = document.createElement('li');
+var x19 = document.createElementNS('http://www.w3.org/1999/xhtml', 'li');
 x19.appendChild(x17);
 return x19
 });
-var x22 = document.createElement('ul');
+var x22 = document.createElementNS('http://www.w3.org/1999/xhtml', 'ul');
 for (var x24 = 0 ; x24 < x21.length ; x24++) {
 x22.appendChild(x21[x24]);
 }
