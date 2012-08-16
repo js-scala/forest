@@ -43,7 +43,6 @@ trait JSGenForest extends JSGenEffect with QuoteGen {
     case _ => super.emitNode(sym, node)
   }
 
-  def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], name: String, out: java.io.PrintWriter) = emitSourceAnyArity(args, body, name, out)
 }
 
 trait JSGenForestPkg extends JSGenForest with JSGenListOps with JSGenObjectOps {
