@@ -73,7 +73,7 @@ trait JSGenPrimitiveOps extends JSGenBase with QuoteGen {
     case ObjIntMaxValue() => emitValDef(sym, "Number.MAX_VALUE")
     case ObjIntMinValue() => emitValDef(sym, "Number.MIN_VALUE")
     case IntDivideFrac(lhs,rhs) => emitValDef(sym, quote(lhs) + " / " + quote(rhs))
-    case IntDivide(lhs,rhs) => emitValDef(sym, quote(lhs) + " / " + quote(rhs))
+    case IntDivide(lhs,rhs) => emitValDef(sym, "Math.floor(" + quote(lhs) + " / " + quote(rhs) + ")")
     case IntMod(lhs,rhs) => emitValDef(sym, quote(lhs) + " % " + quote(rhs))
     case IntBinaryOr(lhs,rhs) => emitValDef(sym, quote(lhs) + " | " + quote(rhs))
     case IntBinaryAnd(lhs,rhs) => emitValDef(sym, quote(lhs) + " & " + quote(rhs))
