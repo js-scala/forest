@@ -21,7 +21,7 @@ class Compiler {
    */
   def compile(sourceDir: Path, outputDir: Path, imports: Seq[String] = Nil, mixins: Seq[String] = Nil) {
     val templates = for (source <- (sourceDir * "*.forest").toList) yield {
-      parser.parse(source.slurpString) match {
+      parser.parse(source.string) match {
         case Right(document) => Right(Lms.generate(document, source.simpleName, outputDir))
         case Left(error) => {
           println("Unable to parse file '%s': %s".format(source.name, error))
