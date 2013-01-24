@@ -5,6 +5,7 @@ import scala.virtualization.lms.internal._
 import scala.reflect.SourceContext
 
 trait QuoteGen { this: GenericCodegen =>
+  import language.implicitConversions
 
   trait Quote {
     def q(args: Any*): String
@@ -32,6 +33,7 @@ trait QuoteGen { this: GenericCodegen =>
  * Allows to write things like `rep"foo $bar baz"` where `bar` is a Rep[_] and will be quoted.
  */
 trait StringInterpolation extends Base { this: StringOps =>
+  import language.implicitConversions
 
   trait RepInterpolator {
     def rep(args: Any*): Rep[String]

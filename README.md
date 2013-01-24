@@ -4,7 +4,7 @@ Forest is a DSL to define how to represent data in HTML. It can produce JavaScri
 
 # Setup
 
-First, setup [js-scala](http://github.com/js-scala/js-scala) (branch `master-M7`) and [scuery](http://github.com/js-scala/scuery).
+First, setup [js-scala](http://github.com/js-scala/js-scala).
 
 Then, you can build the forest DSL:
 

@@ -6,17 +6,17 @@ version := "0.3-SNAPSHOT"
 
 scalaOrganization := "org.scala-lang.virtualized"
 
-scalaVersion := Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.10.0-M7")
+scalaVersion := "2.10.0"
 
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xexperimental", "-Yvirtualize")
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xexperimental", "-Yvirtualize")
 
 resolvers += ScalaToolsSnapshots
 
 libraryDependencies ++= Seq(
-  "EPFL" %% "js-scala" % "0.2-SNAPSHOT",
+  "EPFL" %% "js-scala" % "0.3-SNAPSHOT",
   "EPFL" %% "lms" % "0.3-SNAPSHOT",
-  "scalate" %% "scuery" % "4.0.0-SNAPSHOT",
-  "org.scalatest" % "scalatest_2.10.0-M7" % "1.9-2.10.0-M7-B1" % "test"
+  "org.fusesource.scalate" %% "scalate-core" % "1.6.1",
+  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )
 
 parallelExecution in Test := false

@@ -41,6 +41,7 @@ trait Forest extends Base {
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
+  import language.implicitConversions
 
   // TODO replace “tag” with “el”
   def tag(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*)(implicit ns: NS) =

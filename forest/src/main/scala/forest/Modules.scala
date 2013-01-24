@@ -13,6 +13,7 @@ import scala.virtualization.lms.common.EffectExp
 import scala.virtualization.lms.common.ScalaGenEffect
 
 trait Modules { self: Base with JSProxyBase =>
+  import language.implicitConversions
 
   /** A Module is a singleton implementing a given type A */
   sealed abstract class Module[A]
@@ -37,6 +38,7 @@ trait Modules { self: Base with JSProxyBase =>
 }
 
 trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
+  import language.implicitConversions
 
   /** Module definition */
   case class ModuleDef[A : Manifest](methods: List[MethodDef]) extends Def[Module[A]]
@@ -54,7 +56,7 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
   // TODO Use the new reflection API
   override def module[A <: AnyRef : Manifest]: Exp[Module[A]] = {
     // Reminder: A Scala trait T is compiled in a Java interface T + a Java class T$class
-    val interfaceClazz = manifest[A].erasure
+    val interfaceClazz = manifest[A].runtimeClass
     val classClazz = Class.forName(interfaceClazz.getName + "$class")
 
     assert(classClazz != null, "Unable to find implementation for trait " + interfaceClazz.getName)
@@ -151,12 +153,13 @@ trait JSGenModules extends JSGenEffect {
 }
 
 trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
+  import language.implicitConversions
 
   case class ModuleW[A](a: A) extends Module[A]
 
   override def module[A <: AnyRef : Manifest]: Module[A] =  new ModuleW(create[A])
 
-  def create[A : Manifest]: A = sys.error("Unable to create a value of type %s".format(manifest[A].erasure.getName))
+  def create[A : Manifest]: A = sys.error("Unable to create a value of type %s".format(manifest[A].runtimeClass.getName))
 
   override protected implicit def moduleToA[A <: AnyRef : Manifest](m: Module[A]): A = m match {
     case ModuleW(a) => a
