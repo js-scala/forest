@@ -4,7 +4,7 @@ import forest.ast._
 import scala.util.parsing.combinator.JavaTokenParsers
 
 class Parser extends JavaTokenParsers {
-  
+
   override def skipWhitespace = false
   
   val nl: Parser[String] = "\r?\n".r
