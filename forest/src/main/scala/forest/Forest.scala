@@ -29,39 +29,38 @@ trait Forest extends Base {
 /**
  * Sweeter syntax
  * {{{
- *   tag('div, 'class->'article, "data-id"->article.id)(
- *     tag('span)(
- *       text("Name: " + article.name)),
- *     tag('span)(
- *       text("Description: " + article.description))
+ *   el('div, 'class->'article, "data-id"->article.id)(
+ *     el('span)(
+ *       "Name: " + article.name),
+ *     el('span)(
+ *       "Description: " + article.description)
  *   )
  *   
- *   tag2('ul)(
- *     for (x <- xs) yield item(x))
+ *   el2('ul)(
+ *     for (x <- xs) yield item(x)
+ *   )
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
   import language.implicitConversions
 
-  // TODO replace “tag” with “el”
-  def tag(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*)(implicit ns: NS) =
+  def el(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*)(implicit ns: NS) =
     forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, list_new(children), ns.value)
 
-  def tag2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]])(implicit ns: NS) =
+  def el2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]])(implicit ns: NS) =
     forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, children, ns.value)
 
   // TODO provide a txt"Hello $user!" equivalent to text("Hello " + user + "!")
-  // TODO replace with txt("foo")
-  def text(s: Rep[String]) =
+  def txt(s: Rep[String]) =
     forest_text(s)
 
   /**
    * {{{
-   *   tag('div)(
+   *   el('div)(
    *     withNamespace(NS.SVG) { implicit ns =>
-   *       tag('svg)(
-   *         tag('defs)(…),
-   *         tag('g)(…))
+   *       el('svg)(
+   *         el('defs)(…),
+   *         el('g)(…))
    *     })
    * }}}
    */
@@ -89,8 +88,8 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
   override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]], xmlns: String) = {
     reflectEffect {
       children match {
-        case Def(ListNew(children)) =>
-          Tag(name, xmlns, Left(children.toList), attrs)
+        case Def(ListNew(cs)) =>
+          Tag(name, xmlns, Left(cs.toList), attrs)
         case _ =>
           Tag(name, xmlns, Right(children), attrs)
       }

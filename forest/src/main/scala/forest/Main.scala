@@ -22,11 +22,11 @@ trait Articles extends ForestPkg with ScalaOpsPkg with LiftScala with Structs {
    *   </dl>
    */
   def show(article: Rep[Article]) = {
-    tag('dl, 'class->(if (article.highlighted) "highlighted" else ""))(
-      tag('dt)(text("Name")),
-      tag('dd)(text(article.name)),
-      tag('dt)(text("Price")),
-      tag('dd)(text(article.price + " Euros"))
+    el('dl, 'class->(if (article.highlighted) "highlighted" else ""))(
+      el('dt)(txt("Name")),
+      el('dd)(txt(article.name)),
+      el('dt)(txt("Price")),
+      el('dd)(txt(article.price + " Euros"))
     )
   }
 
@@ -39,9 +39,9 @@ trait Articles extends ForestPkg with ScalaOpsPkg with LiftScala with Structs {
    *   </ul>
    */
   def list(articles: Rep[List[Article]]) = {
-      tag2('ul)(
+      el2('ul)(
         for (article <- articles) yield {
-          tag('li)(show(article))
+          el('li)(show(article))
         }
       )
   }
