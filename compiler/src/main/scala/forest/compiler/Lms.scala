@@ -22,9 +22,9 @@ class Lms {
   implicit val quoteNode: Quote[Node] = new Quote[Node] {
     override def quote(node: Node) = node match {
       case Tag(name, children, attrs, _) => {
-        "tag2(%s%s)(%s)".format(q(name), q(attrs)(quoteAttrs), q(children)(quoteNodes))
+        "el(%s%s)(%s)".format(q(name), q(attrs)(quoteAttrs), q(children)(quoteNodes))
       }
-      case Text(content) => "text(%s)".format(content.map(c => q(c)).mkString(" + "))
+      case Text(content) => "txt(%s)".format(content.map(c => q(c)).mkString(" + "))
       case If(cond, thenPart, elsePart) => {
         "if (%s) %s else %s".format(q(cond), q(thenPart), q(elsePart))
       }

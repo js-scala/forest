@@ -2,7 +2,7 @@ name := "forest-compiler"
 
 organization := "js-scala"
 
-version := "0.3-SNAPSHOT"
+version := "0.4-SNAPSHOT"
 
 mainClass := Some("forest.Run")
 
