@@ -8,10 +8,10 @@ class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
 
   trait Prog extends ForestPkg with TreeManipulation with LiftAll {
     def all(xs: Rep[List[String]]) = {
-      el2('div)(xs map one)
+      el('div)(xs map one)
     }
     def one(x: Rep[String]) = {
-      el('span)(txt(x))
+      el('span)(x)
     }
     def update(r: Rep[NodeRef]) = {
       r transform ({ (n: Rep[TransformableNode]) =>

@@ -24,9 +24,11 @@ var x19 = document.createElementNS('http://www.w3.org/1999/xhtml', 'li');
 x19.appendChild(x17);
 return x19
 });
-var x22 = document.createElementNS('http://www.w3.org/1999/xhtml', 'ul');
-for (var x24 = 0 ; x24 < x21.length ; x24++) {
-x22.appendChild(x21[x24]);
+var x22 = [];
+var x23 = x21.concat(x22);
+var x24 = document.createElementNS('http://www.w3.org/1999/xhtml', 'ul');
+for (var x26 = 0 ; x26 < x23.length ; x26++) {
+x24.appendChild(x23[x26]);
 }
-return x22
+return x24
 }

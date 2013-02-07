@@ -5,8 +5,8 @@ class Tree extends ((java.lang.String)=>(scala.xml.Node)) {
 def apply(x0:java.lang.String): scala.xml.Node = {
 val x1 = "Content: "+x0
 val x2 = {xml.Text(x1)}
-val x3 = (42).toString()
-val x5 = <div class={"message"}  data-id={x3}>{x2}</div>
+val x4 = (42).toString()
+val x5 = <div class={"message"}  data-id={x4}>{x2}</div>
 x5
 }
 }
@@ -41,8 +41,10 @@ val x19 = {xml.Text(x18)}
 val x21 = <li>{x19}</li>
 x21
 }
-val x24 = <ul>{x23}</ul>
-x24
+val x24 = List()
+val x25 = x23 ::: x24
+val x26 = <ul>{x25}</ul>
+x26
 }
 }
 /*****************************************

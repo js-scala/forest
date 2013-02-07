@@ -39,7 +39,7 @@ trait Articles extends ForestPkg with ScalaOpsPkg with LiftScala with Structs {
    *   </ul>
    */
   def list(articles: Rep[List[Article]]) = {
-      el2('ul)(
+      el('ul)(
         for (article <- articles) yield {
           el('li)(show(article))
         }

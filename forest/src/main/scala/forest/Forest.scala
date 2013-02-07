@@ -36,21 +36,26 @@ trait Forest extends Base {
  *       "Description: " + article.description)
  *   )
  *   
- *   el2('ul)(
+ *   el('ul)(
  *     for (x <- xs) yield item(x)
  *   )
  * }}}
  */
 trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
   import language.implicitConversions
+  import Magnets._
 
-  def el(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[Node]*)(implicit ns: NS) =
-    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, list_new(children), ns.value)
+  def el(name: StrValue, attrs: (StrValue, Rep[_])*)(children: NodeValue*)(implicit ns: NS) = {
+    val constNodes = children.collect { case ConstNode(node) => node }
+    val cs = if (constNodes.size == children.size) list_new(constNodes.to[List]) else {
+      children.foldLeft(List[Node]()) {
+        case (cs, ConstNode(n)) => n :: cs
+        case (cs, NodeList(ns)) => ns ++ cs
+      }
+    }
+    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, cs, ns.value)
+  }
 
-  def el2(name: StrValue, attrs: (StrValue, Rep[Any])*)(children: Rep[List[Node]])(implicit ns: NS) =
-    forest_tag(name.value, attrs.map({ case (n, v) => (n.value, v.toString()) }).toMap, children, ns.value)
-
-  // TODO provide a txt"Hello $user!" equivalent to text("Hello " + user + "!")
   def txt(s: Rep[String]) =
     forest_text(s)
 
@@ -73,11 +78,22 @@ trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
     val MATHML = NS("http://www.w3.org/1998/Math/MathML")
   }
 
-  case class StrValue(value: String)
-  implicit def stringToStringValue(s: String): StrValue = StrValue(s)
-  implicit def symbolToStringValue(s: Symbol): StrValue = StrValue(s.name)
   implicit def symbolToRepString(s: Symbol): Rep[String] = unit(s.name) // To be able to write "class"->'bar
-  implicit def tupleWithStringValue[A <% StrValue, B <% Rep[_]](t: (A, B)): (StrValue, Rep[_]) = (t._1, t._2)
+
+  object Magnets {
+    case class StrValue(value: String)
+    implicit def stringToStringValue(s: String): StrValue = StrValue(s)
+    implicit def symbolToStringValue(s: Symbol): StrValue = StrValue(s.name)
+    implicit def tupleWithStringValue[A <% StrValue, B <% Rep[_]](t: (A, B)): (StrValue, Rep[_]) = (t._1, t._2)
+
+    sealed abstract class NodeValue
+    case class ConstNode(node: Rep[Node]) extends NodeValue
+    case class NodeList(nodes: Rep[List[Node]]) extends NodeValue
+    implicit def repNode(node: Rep[Node]): NodeValue = ConstNode(node)
+    implicit def repNodes(nodes: Rep[List[Node]]): NodeValue = NodeList(nodes)
+    implicit def repText(s: Rep[String]): NodeValue = ConstNode(txt(s))
+    implicit def string(s: String)(implicit ev: String => Rep[String]): NodeValue = repText(s)
+  }
 }
 
 /**

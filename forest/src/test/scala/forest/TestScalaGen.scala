@@ -11,14 +11,14 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
     def oneChild(content: Rep[String]) = {
       el('div, 'class->'message, "data-id"->42)(
-        txt("Content: " + content))
+        "Content: " + content)
     }
 
     def severalChildren(s: Rep[String]) = {
-      val g = el('strong)(txt(s))
+      val g = el('strong)(s)
       new Record {
         val root = el('div)(
-          txt("Hello "), g, txt("!")
+          "Hello ", g, "!"
         )
         val greeted = g
       }
@@ -26,9 +26,9 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
     def dynamicChildren(xs: Rep[List[String]]) = {
       val items = for (x <- xs) yield {
-        el('li)(txt(x))
+        el('li)(x)
       }
-      el2('ul)(items)
+      el('ul)(items)
     }
 
   }
