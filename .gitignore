@@ -8,4 +8,4 @@ target/
 .target/
 .settings/
 local.properties
-project/user.sbt
+user.sbt
