@@ -1,12 +1,12 @@
 package forest
 
 import org.scalatest._
-import forest._
 import virtualization.lms.common._
+import js._
 
 class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
 
-  trait Prog extends ForestPkg with TreeManipulation with LiftAll {
+  trait Prog { this: JsScala with Forest with TreeManipulation with LiftJsScala =>
     def all(xs: Rep[List[String]]) = {
       el('div)(xs map one)
     }
@@ -21,9 +21,9 @@ class TestTreeManipulation extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testAppending() = testWithOutFile("tree-manipulation") { out =>
-    val prog = new Prog with ForestPkgExp with TreeManipulationExp { self =>
-      val scalaCodegen = new ScalaGenForestPkg with ScalaGenTreeManipulation { val IR: self.type = self }
-      val jsCodegen = new JSGenForestPkg with JSGenTreeManipulation { val IR: self.type = self }
+    val prog = new Prog with JsScalaExp with ForestExp with TreeManipulationExp with LiftJsScala { self =>
+      val scalaCodegen = new ScalaGenJsScala with ScalaGenForest with ScalaGenTreeManipulation { val IR: self.type = self }
+      val jsCodegen = new JSGenJsScala with JSGenForest with JSGenTreeManipulation { val IR: self.type = self }
       
       scalaCodegen.emitSource(self.update, "Update", out)
       jsCodegen.emitSource(self.update, "update", out)

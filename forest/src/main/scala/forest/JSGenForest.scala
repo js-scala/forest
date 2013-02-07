@@ -44,7 +44,3 @@ trait JSGenForest extends JSGenEffect with QuoteGen {
   }
 
 }
-
-trait JSGenForestPkg extends JSGenForest with JSGenListOps with JSGenObjectOps {
-  val IR: ForestPkgExp
-}

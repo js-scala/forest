@@ -1,13 +1,14 @@
 package forest
 
-import scala.js._
 import scala.virtualization.lms.common._
 import scala.xml.Node
 
 /**
  * Forest DSL interface
  */
-trait Forest extends Base {
+trait Forest extends Base { this: ListOps with ObjectOps =>
+  import language.implicitConversions
+  import Magnets._
 
   /**
    * Creates a tag node (e.g.`<div class="foo" />`)
@@ -24,27 +25,21 @@ trait Forest extends Base {
    */
   def forest_text(xs: Rep[String]): Rep[Node]
 
-}
-
-/**
- * Sweeter syntax
- * {{{
- *   el('div, 'class->'article, "data-id"->article.id)(
- *     el('span)(
- *       "Name: " + article.name),
- *     el('span)(
- *       "Description: " + article.description)
- *   )
- *   
- *   el('ul)(
- *     for (x <- xs) yield item(x)
- *   )
- * }}}
- */
-trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
-  import language.implicitConversions
-  import Magnets._
-
+  /**
+   * Sweeter syntax
+   * {{{
+   *   el('div, 'class->'article, "data-id"->article.id)(
+   *     el('span)(
+   *       "Name: " + article.name),
+   *     el('span)(
+   *       "Description: " + article.description)
+   *   )
+   *
+   *   el('ul)(
+   *     for (x <- xs) yield item(x)
+   *   )
+   * }}}
+   */
   def el(name: StrValue, attrs: (StrValue, Rep[_])*)(children: NodeValue*)(implicit ns: NS) = {
     val constNodes = children.collect { case ConstNode(node) => node }
     val cs = if (constNodes.size == children.size) list_new(constNodes.to[List]) else {
@@ -99,7 +94,7 @@ trait ForestDSL extends Forest { this: ListOps with ObjectOps =>
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
+trait ForestExp extends Forest with EffectExp { this: ListOpsExp with ObjectOpsExp =>
 
   override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]], xmlns: String) = {
     reflectEffect {
@@ -120,10 +115,3 @@ trait ForestExp extends Forest with EffectExp { this: ListOpsExp =>
   case class Text(content: Exp[String]) extends Def[Node]
 
 }
-
-
-// --- Convenient packages
-
-// TODO do not include JS. Use common LMS traits.
-trait ForestPkg extends Forest with ForestDSL with ListOps with ObjectOps
-trait ForestPkgExp extends ForestExp with ListOpsExp with ListOpsExpOpt with ObjectOpsExp with ObjectOpsExpOpt

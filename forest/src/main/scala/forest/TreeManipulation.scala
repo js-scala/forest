@@ -7,7 +7,7 @@ import scala.xml.Node
 /**
  * DSL to manipulate trees.
  */
-trait TreeManipulation extends Forest {
+trait TreeManipulation extends Forest with ListOps with ObjectOps {
 
   /** A set of Nodes to be manipulated */
   type NodeRef
@@ -32,7 +32,7 @@ trait TreeManipulation extends Forest {
   implicit def transformableNodeManifest: Manifest[TransformableNode]
 }
 
-trait TreeManipulationExp extends TreeManipulation with EffectExp { this: ForestExp =>
+trait TreeManipulationExp extends TreeManipulation with EffectExp with ListOpsExp with ObjectOpsExp { this: ForestExp =>
 
   override type TransformableNode = scala.xml.NodeSeq
   override type NodeSelection = scala.xml.NodeSeq

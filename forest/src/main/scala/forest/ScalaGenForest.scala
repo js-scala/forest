@@ -40,7 +40,3 @@ trait ScalaGenForest extends ScalaGenEffect {
   }
 
 }
-
-trait ScalaGenForestPkg extends ScalaGenForest with ScalaGenListOps with ScalaGenObjectOps {
-  val IR: ForestPkgExp
-}

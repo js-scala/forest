@@ -4,31 +4,32 @@ var x3 = document.createElementNS('http://www.w3.org/1999/xhtml', 'button');
 x3.appendChild(x1);
 var x4 = "Content: "+x0;
 var x5 = document.createTextNode(x4);
-var x7 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-x7.setAttribute('class', "message");
-x7.appendChild(x5);
-x7.appendChild(x3);
-var x8 = {'root' : x7,'btn' : x3};
-return x8
+var x7 = ("message").toString();
+var x8 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+x8.setAttribute('class', x7);
+x8.appendChild(x5);
+x8.appendChild(x3);
+var x9 = {'root' : x8,'btn' : x3};
+return x9
 }
-function OneChild(x10) {
-var x11 = document.createTextNode(x10);
-var x13 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-x13.appendChild(x11);
-return x13
+function OneChild(x11) {
+var x12 = document.createTextNode(x11);
+var x14 = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+x14.appendChild(x12);
+return x14
 }
-function DynamicChildren(x15) {
-var x21=x15.map(function(x16){
-var x17 = document.createTextNode(x16);
-var x19 = document.createElementNS('http://www.w3.org/1999/xhtml', 'li');
-x19.appendChild(x17);
-return x19
+function DynamicChildren(x16) {
+var x22=x16.map(function(x17){
+var x18 = document.createTextNode(x17);
+var x20 = document.createElementNS('http://www.w3.org/1999/xhtml', 'li');
+x20.appendChild(x18);
+return x20
 });
-var x22 = [];
-var x23 = x21.concat(x22);
-var x24 = document.createElementNS('http://www.w3.org/1999/xhtml', 'ul');
-for (var x26 = 0 ; x26 < x23.length ; x26++) {
-x24.appendChild(x23[x26]);
+var x23 = [];
+var x24 = x22.concat(x23);
+var x25 = document.createElementNS('http://www.w3.org/1999/xhtml', 'ul');
+for (var x27 = 0 ; x27 < x24.length ; x27++) {
+x25.appendChild(x24[x27]);
 }
-return x24
+return x25
 }

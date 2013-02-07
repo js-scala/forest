@@ -35,7 +35,7 @@ class Compiler {
            |import forest._
            |%s
            |
-           |trait %s extends ForestPkg %s{
+           |trait %s extends JsScala with Forest %s{
            |  trait %s {
            |    %s
            |  }

@@ -8,7 +8,7 @@ import scala.virtualization.lms.common._
 // --- Example of template definition
 
 // TODO routes & i18n.
-trait Articles extends ForestPkg with ScalaOpsPkg with LiftScala with Structs {
+trait Articles { this: JsScala with Forest with LiftJsScala =>
 
   type Article = Record { val name: String; val price: Double; val highlighted: Boolean }
   def Article(n: Rep[String], p: Rep[Double], h: Rep[Boolean]): Rep[Article] =
@@ -51,12 +51,12 @@ trait Articles extends ForestPkg with ScalaOpsPkg with LiftScala with Structs {
 
 object Main extends App {
 
-  val prog = new Articles with ForestPkgExp with ScalaOpsPkgExp with TupledFunctionsExp with StructExp
+  val prog = new Articles with JsScalaExp with ForestExp with LiftJsScala
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenForestPkg with JSCodeGenPkg with JSGenStruct { val IR: prog.type = prog }
+  val jsCodegen = new JSGenJsScala with JSGenForest { val IR: prog.type = prog }
   jsCodegen.emitSource(prog.list, "ArticlesList", new PrintWriter(System.out))
 
-  val scalaGen = new ScalaGenForestPkg with ScalaCodeGenPkg with ScalaGenStruct { val IR: prog.type = prog }
+  val scalaGen = new ScalaGenJsScala with ScalaGenForest { val IR: prog.type = prog }
   scalaGen.emitSource(prog.list, "ArticlesList", new PrintWriter(System.out))
 }
