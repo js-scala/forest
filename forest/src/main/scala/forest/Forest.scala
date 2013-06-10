@@ -6,7 +6,7 @@ import scala.xml.Node
 /**
  * Forest DSL interface
  */
-trait Forest extends Base { this: ListOps with ObjectOps =>
+trait Forest extends Base with ListOps with ObjectOps {
   import language.implicitConversions
   import Magnets._
 
@@ -94,7 +94,7 @@ trait Forest extends Base { this: ListOps with ObjectOps =>
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp { this: ListOpsExp with ObjectOpsExp =>
+trait ForestExp extends Forest with EffectExp with ListOpsExp with ObjectOpsExp {
 
   override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]], xmlns: String) = {
     reflectEffect {

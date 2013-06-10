@@ -1,12 +1,14 @@
 package forest
 
-import scala.virtualization.lms.common._
 import org.scalatest.Suite
-import js._
+import scala.js.language.JsScala
+import scala.js.exp.JsScalaExp
+import scala.js.gen.scala.GenJsScala
+import scala.virtualization.lms.common.CompileScala
 
 class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 
-  trait Prog { this: JsScala with Forest with LiftJsScala =>
+  trait Prog extends JsScala with Forest {
 
     def oneChild(content: Rep[String]) = {
       el('div, 'class->'message, "data-id"->42)(
@@ -33,9 +35,9 @@ class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
   }
 
   def testXmlGen = testWithOutFile("tree-scala") { out =>
-    val prog = new Prog with JsScalaExp with ForestExp with LiftJsScala with CompileScala { self =>
+    val prog = new Prog with JsScalaExp with ForestExp with CompileScala { self =>
 
-      override val codegen = new ScalaGenJsScala with ScalaGenForest { val IR: self.type = self }
+      override val codegen = new GenJsScala with ScalaGenForest { val IR: self.type = self }
 
       codegen.emitSource(self.oneChild, "Tree", out)
       // val messageCompiled = compile(self.oneChild)

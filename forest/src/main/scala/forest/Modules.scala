@@ -1,18 +1,13 @@
 package forest
 
 import java.io.PrintWriter
-import scala.Array.canBuildFrom
-import scala.Tuple2.apply
-import scala.js.JSProxyBase
-import scala.js.JSProxyExp
-import scala.js.JSProxyInScala
-import scala.js.JSGenEffect
-import scala.js.JSInScala
-import scala.virtualization.lms.common.Base
-import scala.virtualization.lms.common.EffectExp
-import scala.virtualization.lms.common.ScalaGenEffect
+import scala.js.language.Proxy
+import scala.js.exp.ProxyExp
+import scala.js.gen.js.GenEffect
+import scala.js.{JSInScala, JSProxyInScala}
+import scala.virtualization.lms.common.{Base, EffectExp, ScalaGenEffect}
 
-trait Modules { self: Base with JSProxyBase =>
+trait Modules extends Base with Proxy { self =>
   import language.implicitConversions
 
   /** A Module is a singleton implementing a given type A */
@@ -37,7 +32,7 @@ trait Modules { self: Base with JSProxyBase =>
 
 }
 
-trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
+trait ModulesExp extends Modules with EffectExp with ProxyExp {
   import language.implicitConversions
 
   /** Module definition */
@@ -96,7 +91,7 @@ trait ModulesExp extends Modules with EffectExp { this: JSProxyExp =>
   def proxyTrait[T <: AnyRef](x: Rep[T], parentCtor: Option[Rep[Any]])(implicit outer: Base, m: Manifest[T]): T = proxyTrait(x, parentCtor, outer)
 }
 
-trait JSGenModules extends JSGenEffect {
+trait JSGenModules extends scala.js.gen.js.GenEffect {
   val IR: ModulesExp
   import IR._
 
@@ -152,7 +147,7 @@ trait JSGenModules extends JSGenEffect {
 
 }
 
-trait ModulesInScala extends Modules with JSInScala { this: JSProxyInScala =>
+trait ModulesInScala extends Modules with JSInScala with JSProxyInScala {
   import language.implicitConversions
 
   case class ModuleW[A](a: A) extends Module[A]

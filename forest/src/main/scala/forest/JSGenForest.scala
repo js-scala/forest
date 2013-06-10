@@ -1,12 +1,12 @@
 package forest
 
-import scala.virtualization.lms.common._
-import scala.js._
+import scala.js.gen.js.GenEffect
+import scala.js.gen.QuoteGen
 
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends JSGenEffect with QuoteGen {
+trait JSGenForest extends GenEffect with QuoteGen {
   val IR: ForestExp
   import IR._
 

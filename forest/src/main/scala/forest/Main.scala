@@ -1,14 +1,15 @@
 package forest
 
 import java.io.PrintWriter
-import scala.js._
+import scala.js.language.JsScala
+import scala.js.exp.JsScalaExp
 import scala.virtualization.lms.common._
 
 
 // --- Example of template definition
 
 // TODO routes & i18n.
-trait Articles { this: JsScala with Forest with LiftJsScala =>
+trait Articles extends JsScala with Forest {
 
   type Article = Record { val name: String; val price: Double; val highlighted: Boolean }
   def Article(n: Rep[String], p: Rep[Double], h: Rep[Boolean]): Rep[Article] =
@@ -51,12 +52,12 @@ trait Articles { this: JsScala with Forest with LiftJsScala =>
 
 object Main extends App {
 
-  val prog = new Articles with JsScalaExp with ForestExp with LiftJsScala
+  val prog = new Articles with JsScalaExp with ForestExp
 
   // The JavaScript code generation
-  val jsCodegen = new JSGenJsScala with JSGenForest { val IR: prog.type = prog }
+  val jsCodegen = new scala.js.gen.js.GenJsScala with JSGenForest { val IR: prog.type = prog }
   jsCodegen.emitSource(prog.list, "ArticlesList", new PrintWriter(System.out))
 
-  val scalaGen = new ScalaGenJsScala with ScalaGenForest { val IR: prog.type = prog }
+  val scalaGen = new scala.js.gen.scala.GenJsScala with ScalaGenForest { val IR: prog.type = prog }
   scalaGen.emitSource(prog.list, "ArticlesList", new PrintWriter(System.out))
 }

@@ -1,13 +1,12 @@
 package forest
 
-import scala.virtualization.lms.common._
-import scala.virtualization.lms.internal._
+import scala.virtualization.lms.common.{Base, StringOps}
 import scala.reflect.SourceContext
 
 /**
  * Allows to write things like `rep"foo $bar baz"` where `bar` is a Rep[_] and will be quoted.
  */
-trait StringInterpolation extends Base { this: StringOps =>
+trait StringInterpolation extends Base with StringOps {
   import language.implicitConversions
 
   trait RepInterpolator {

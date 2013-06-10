@@ -1,13 +1,12 @@
 package forest
 
-import scala.js.JSGenEffect
 import scala.virtualization.lms.common._
 import scala.xml.Node
 
 /**
  * DSL to manipulate trees.
  */
-trait TreeManipulation extends Forest with ListOps with ObjectOps {
+trait TreeManipulation extends Forest {
 
   /** A set of Nodes to be manipulated */
   type NodeRef
@@ -32,7 +31,7 @@ trait TreeManipulation extends Forest with ListOps with ObjectOps {
   implicit def transformableNodeManifest: Manifest[TransformableNode]
 }
 
-trait TreeManipulationExp extends TreeManipulation with EffectExp with ListOpsExp with ObjectOpsExp { this: ForestExp =>
+trait TreeManipulationExp extends TreeManipulation with EffectExp with ForestExp {
 
   override type TransformableNode = scala.xml.NodeSeq
   override type NodeSelection = scala.xml.NodeSeq
@@ -73,7 +72,7 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp with ListOpsEx
 
 }
 
-trait JSGenTreeManipulation extends JSGenEffect {
+trait JSGenTreeManipulation extends scala.js.gen.js.GenEffect {
 
   val IR: TreeManipulationExp
   import IR._

@@ -25,5 +25,4 @@ var x17 = document.createElementNS('http://www.w3.org/1999/xhtml', 'span');
 x17.appendChild(x15);
 var x18 = x14.append(x17);
 var x20 = x18;
-return x20
 }
