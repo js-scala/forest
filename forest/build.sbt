@@ -6,7 +6,9 @@ version := "0.5-SNAPSHOT"
 
 scalaOrganization := "org.scala-lang.virtualized"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2-RC1"
+
+resolvers += Resolver.sonatypeRepo("snapshots")
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xexperimental", "-Yvirtualize")
 

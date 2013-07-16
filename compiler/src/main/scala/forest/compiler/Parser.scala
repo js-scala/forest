@@ -52,7 +52,7 @@ class Parser extends JavaTokenParsers {
     "{" ~> p <~ "}"
   
   // Forest expression (enclosed in braces)
-  val expr: Parser[Expr] =
+  def expr: Parser[Expr] =
     wrapped(Forest.expr)
   
   // Mix of raw text and forest expressions
