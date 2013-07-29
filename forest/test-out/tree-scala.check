@@ -17,14 +17,14 @@ x6
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class SeveralChildren extends ((java.lang.String)=>(RecordNodeNode)) {
-def apply(x8:java.lang.String): RecordNodeNode = {
+class SeveralChildren extends ((java.lang.String)=>(RecordElementElement)) {
+def apply(x8:java.lang.String): RecordElementElement = {
 val x9 = {xml.Text(x8)}
 val x11 = <strong>{x9}</strong>
 val x13 = {xml.Text("Hello ")}
 val x14 = {xml.Text("!")}
 val x16 = <div>{List(x13, x11, x14)}</div>
-val x12 = RecordNodeNode(root = x16, greeted = x11)
+val x12 = RecordElementElement(root = x16, greeted = x11)
 x12
 }
 }
@@ -50,4 +50,4 @@ x27
 /*****************************************
   End of Generated Code                  
 *******************************************/
-case class RecordNodeNode(root: scala.xml.Node, greeted: scala.xml.Node)
+case class RecordElementElement(root: scala.xml.Node, greeted: scala.xml.Node)

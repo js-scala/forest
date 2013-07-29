@@ -1,12 +1,13 @@
 package forest
 
 import scala.virtualization.lms.common._
-import scala.xml.Node
+import scala.js.language.dom.ElementOps
+import scala.js.exp.dom.ElementOpsExp
 
 /**
  * Forest DSL interface
  */
-trait Forest extends Base with ListOps with ObjectOps {
+trait Forest extends ElementOps with ListOps with ObjectOps {
   import language.implicitConversions
   import Magnets._
 
@@ -17,13 +18,13 @@ trait Forest extends Base with ListOps with ObjectOps {
    * @param attrs Tag attributes
    */
   // FIXME attrs: Map[String, Option[Rep[String]] to handle attributes with no value
-  def forest_tag(name: String, attrs: Map[String, Rep[String]], children: Rep[List[Node]], xmlns: String): Rep[Node]
+  def forest_tag(name: String, attrs: Map[String, Rep[String]], children: Rep[List[Element]], xmlns: String): Rep[Element]
 
   /**
    * Creates a text node (e.g. `foo`)
    * @param xs Elements of the text node. The type of `xs` is `List` to allow to mix string literal (e.g. `"foo"`) and symbols (e.g. `foo.bar`)
    */
-  def forest_text(xs: Rep[String]): Rep[Node]
+  def forest_text(xs: Rep[String]): Rep[Element]
 
   /**
    * Sweeter syntax
@@ -43,7 +44,7 @@ trait Forest extends Base with ListOps with ObjectOps {
   def el(name: StrValue, attrs: (StrValue, Rep[_])*)(children: NodeValue*)(implicit ns: NS) = {
     val constNodes = children.collect { case ConstNode(node) => node }
     val cs = if (constNodes.size == children.size) list_new(constNodes.to[List]) else {
-      children.foldLeft(List[Node]()) {
+      children.foldLeft(List[Element]()) {
         case (cs, ConstNode(n)) => n :: cs
         case (cs, NodeList(ns)) => ns ++ cs
       }
@@ -64,7 +65,7 @@ trait Forest extends Base with ListOps with ObjectOps {
    *     })
    * }}}
    */
-  def withNamespace(ns: NS)(f: NS => Rep[Node]): Rep[Node] = f(ns)
+  def withNamespace(ns: NS)(f: NS => Rep[Element]): Rep[Element] = f(ns)
 
   case class NS(value: String)
   object NS {
@@ -82,10 +83,10 @@ trait Forest extends Base with ListOps with ObjectOps {
     implicit def tupleWithStringValue[A <% StrValue, B <% Rep[_]](t: (A, B)): (StrValue, Rep[_]) = (t._1, t._2)
 
     sealed abstract class NodeValue
-    case class ConstNode(node: Rep[Node]) extends NodeValue
-    case class NodeList(nodes: Rep[List[Node]]) extends NodeValue
-    implicit def repNode(node: Rep[Node]): NodeValue = ConstNode(node)
-    implicit def repNodes(nodes: Rep[List[Node]]): NodeValue = NodeList(nodes)
+    case class ConstNode(node: Rep[Element]) extends NodeValue
+    case class NodeList(nodes: Rep[List[Element]]) extends NodeValue
+    implicit def repNode(node: Rep[Element]): NodeValue = ConstNode(node)
+    implicit def repNodes(nodes: Rep[List[Element]]): NodeValue = NodeList(nodes)
     implicit def repText(s: Rep[String]): NodeValue = ConstNode(txt(s))
     implicit def string(s: String)(implicit ev: String => Rep[String]): NodeValue = repText(s)
   }
@@ -94,9 +95,9 @@ trait Forest extends Base with ListOps with ObjectOps {
 /**
  * Forest DSL encoding as an AST
  */
-trait ForestExp extends Forest with EffectExp with ListOpsExp with ObjectOpsExp {
+trait ForestExp extends Forest with EffectExp with ElementOpsExp with ListOpsExp with ObjectOpsExp {
 
-  override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Node]], xmlns: String) = {
+  override def forest_tag(name: String, attrs: Map[String, Exp[String]], children: Exp[List[Element]], xmlns: String) = {
     reflectEffect {
       children match {
         case Def(ListNew(cs)) =>
@@ -110,8 +111,8 @@ trait ForestExp extends Forest with EffectExp with ListOpsExp with ObjectOpsExp 
   override def forest_text(content: Exp[String]) = reflectEffect(Text(content))
 
 
-  case class Tag(name: String, xmlns: String, children: Either[List[Exp[Node]], Exp[List[Node]]], attrs: Map[String, Exp[String]]) extends Def[Node]
+  case class Tag(name: String, xmlns: String, children: Either[List[Exp[Element]], Exp[List[Element]]], attrs: Map[String, Exp[String]]) extends Def[Element]
 
-  case class Text(content: Exp[String]) extends Def[Node]
+  case class Text(content: Exp[String]) extends Def[Element]
 
 }

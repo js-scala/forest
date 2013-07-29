@@ -1,12 +1,13 @@
 package forest
 
-import scala.js.gen.js.GenEffect
+import scala.js.gen.js.{GenObjectOps, GenListOps, GenEffect}
 import scala.js.gen.QuoteGen
+import scala.js.gen.js.dom.GenElementOps
 
 /**
  * JavaScript code generator for `ForestExp` expressions
  */
-trait JSGenForest extends GenEffect with QuoteGen {
+trait JSGenForest extends GenEffect with GenElementOps with GenListOps with GenObjectOps with QuoteGen {
   val IR: ForestExp
   import IR._
 

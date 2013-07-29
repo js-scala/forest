@@ -6,7 +6,7 @@ import scala.virtualization.lms.common._
 /**
  * Scala code generator for `ForestExp` expressions
  */
-trait ScalaGenForest extends ScalaGenEffect {
+trait ScalaGenForest extends ScalaGenEffect with ScalaGenListOps with ScalaGenObjectOps {
   val IR: ForestExp
   import IR._
 
@@ -38,5 +38,8 @@ trait ScalaGenForest extends ScalaGenEffect {
     case _ => super.emitNode(sym, node)
 
   }
+
+  override def remap[A](m: Manifest[A]) =
+    if (m == manifest[Element]) "scala.xml.Node" else super.remap(m)
 
 }

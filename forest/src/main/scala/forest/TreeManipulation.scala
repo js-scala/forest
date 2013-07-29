@@ -1,7 +1,6 @@
 package forest
 
 import scala.virtualization.lms.common._
-import scala.xml.Node
 
 /**
  * DSL to manipulate trees.
@@ -24,7 +23,7 @@ trait TreeManipulation extends Forest {
   /**
    * Appends `node` to each node of `target` node selection
    */
-  def infix_append(target: Rep[NodeSelection], node: Rep[Node]): Rep[Unit]
+  def infix_append(target: Rep[NodeSelection], node: Rep[Element]): Rep[Unit]
 
   implicit def nodeRefManifest: Manifest[NodeRef]
   // implicit def nodeSelectionManifest: Manifest[NodeSelection]
@@ -42,7 +41,7 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp with ForestExp
 
   case class NodeRefTransform(root: Exp[NodeRef], o: Sym[org.fusesource.scalate.scuery.Transformer], n: Sym[TransformableNode], body: Block[Unit]) extends Def[Unit]
   case class TransformableFind(root: Rep[TransformableNode], selector: Rep[String]) extends Def[NodeSelection]
-  case class SelectionAppend(target: Rep[NodeSelection], node: Rep[Node]) extends Def[Unit]
+  case class SelectionAppend(target: Rep[NodeSelection], node: Rep[Element]) extends Def[Unit]
 
   override def infix_transform(r: Rep[NodeRef], t: Exp[TransformableNode] => Exp[Unit]) = {
     val o = fresh[org.fusesource.scalate.scuery.Transformer]
@@ -53,7 +52,7 @@ trait TreeManipulationExp extends TreeManipulation with EffectExp with ForestExp
 
   override def infix_find(root: Rep[TransformableNode], selector: Rep[String]) = reflectEffect(TransformableFind(root, selector))
 
-  override def infix_append(target: Rep[NodeSelection], node: Rep[Node]) = reflectEffect(SelectionAppend(target, node))
+  override def infix_append(target: Rep[NodeSelection], node: Rep[Element]) = reflectEffect(SelectionAppend(target, node))
   
   override def syms(e: Any): List[Sym[Any]] = e match {
     case NodeRefTransform(r, o, n, body) => syms(r):::syms(body)
