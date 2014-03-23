@@ -12,8 +12,6 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xexperimental", "-Yvirtualize")
 
-resolvers += ScalaToolsSnapshots
-
 libraryDependencies ++= Seq(
   "EPFL" %% "js-scala" % "0.4-SNAPSHOT",
   "EPFL" %% "lms" % "0.3-SNAPSHOT",
