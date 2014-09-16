@@ -4,7 +4,7 @@ import org.scalatest.Suite
 import scala.js.language.JsScala
 import scala.js.exp.JsScalaExp
 import scala.js.gen.scala.GenJsScala
-import scala.virtualization.lms.common.CompileScala
+import scala.virtualization.lms.common.{Record, CompileScala}
 
 class TestScalaGen extends FileDiffSuite("test-out/") with Suite {
 

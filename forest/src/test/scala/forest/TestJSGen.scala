@@ -5,6 +5,8 @@ import scala.js.exp.JsScalaExp
 import scala.js.gen.js.GenJsScala
 import org.scalatest.Suite
 
+import scala.virtualization.lms.common.Record
+
 class TestJSGen extends FileDiffSuite("test-out/") with Suite {
 
   trait Prog extends JsScala with Forest {
